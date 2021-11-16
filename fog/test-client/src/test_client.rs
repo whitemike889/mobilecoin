@@ -345,6 +345,8 @@ impl TestClient {
     ///   block_index is included
     fn ensure_expected_balance_after_block(
         &self,
+        source_client_hash: ShortAddressHash,
+        source_client_index: usize,
         client: &mut Client,
         block_index: BlockIndex,
         expected_balance: u64,
@@ -353,6 +355,7 @@ impl TestClient {
         let mut deadline = Some(start + self.policy.tx_receive_deadline);
 
         loop {
+            std::thread::sleep(Duration::from_secs(10));
             let (new_balance, new_block_count) = client
                 .check_balance()
                 .map_err(TestClientError::CheckBalance)?;
@@ -368,7 +371,9 @@ impl TestClient {
                 );
                 log::debug!(
                     self.logger,
-                    "Expected balance: {:?}, and got: {:?}",
+                    "Expected balance for client index {}, hash {:?}: {:?} , and got: {:?}",
+                    source_client_index,
+                    source_client_hash,
                     expected_balance,
                     new_balance
                 );
@@ -623,6 +628,10 @@ impl TestClient {
 
         let start_time = Instant::now();
         for ti in 0..num_transactions {
+            // FIXME: Should not be needed
+            log::debug!(self.logger, "sleeping");
+            std::thread::sleep(Duration::from_millis(5000));
+
             log::debug!(self.logger, "Transation: {:?}", ti);
 
             let source_index = ti % client_count;
@@ -636,6 +645,10 @@ impl TestClient {
                 target_client,
                 target_index,
             )?;
+
+            // FIXME: Should not be needed
+            log::debug!(self.logger, "sleeping");
+            std::thread::sleep(Duration::from_millis(5000));
 
             // Attempt double spend on the last transaction. This is an expensive test.
             if ti == num_transactions - 1 {
