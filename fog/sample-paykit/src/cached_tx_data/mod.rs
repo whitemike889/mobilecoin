@@ -807,6 +807,7 @@ impl CachedTxData {
     /// computation)
     pub fn debug_balance(&mut self) -> String {
         let mut lines = Vec::new();
+        lines.push(format!("Debug balance for public address {}: ", self.account_key.default_subaddress()));
         lines.push(format!(
             "num_blocks = {}, key_image_data_completeness = {}, rng_set_num_blocks = {}\n",
             self.get_num_blocks(),
@@ -818,8 +819,8 @@ impl CachedTxData {
             self.owned_tx_outs.len(),
             self.rng_set.get_rngs().len()
         ));
-        for owned_tx_out in self.owned_tx_outs.values() {
-            lines.push(format!("{:?}\n", owned_tx_out));
+        for (i, owned_tx_out) in self.owned_tx_outs.values().enumerate() {
+            lines.push(format!("{},{},{}", i, owned_tx_out.value, owned_tx_out.status));
         }
         lines.join("\n")
     }

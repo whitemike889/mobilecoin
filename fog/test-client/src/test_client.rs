@@ -249,6 +249,8 @@ impl TestClient {
         let fee = source_client.get_fee().unwrap_or(Mob::MINIMUM_FEE);
 
         // Scope for build operation
+        log::info!(self.logger, "fn transfer fee is: {}", fee);
+        log::info!(self.logger, "policy.transfer_amount: {}", self.policy.transfer_amount);
         let transaction = {
             let start = Instant::now();
             let transaction = source_client
@@ -345,6 +347,7 @@ impl TestClient {
     ///   block_index is included
     fn ensure_expected_balance_after_block(
         &self,
+        source_client_index: usize,
         client: &mut Client,
         block_index: BlockIndex,
         expected_balance: u64,
@@ -353,26 +356,33 @@ impl TestClient {
         let mut deadline = Some(start + self.policy.tx_receive_deadline);
 
         loop {
+            std::thread::sleep(Duration::from_secs(10));
             let (new_balance, new_block_count) = client
                 .check_balance()
                 .map_err(TestClientError::CheckBalance)?;
 
             // Wait for client cursor to include the index where the transaction landed.
             if u64::from(new_block_count) > block_index {
-                log::debug!(
+                log::info!(
                     self.logger,
                     "Txo cursor now {} > block_index {}, after {:?}",
                     new_block_count,
                     block_index,
                     start.elapsed()
                 );
-                log::debug!(
+                let client_public_address = client.get_account_key().default_subaddress();
+                log::info!(
                     self.logger,
-                    "Expected balance: {:?}, and got: {:?}",
+                    "Expected balance for client index {}, public address {:?}: {:?} , and got: {:?}",
+                    source_client_index,
+                    client_public_address,
                     expected_balance,
                     new_balance
                 );
                 if expected_balance != new_balance {
+                    let debug_balance = client.debug_balance();
+                    log::info!(self.logger, "WRONG BALANCE for client with public address {}: {}", client_public_address, debug_balance);
+                    log::info!(self.logger, "Balance Total: {}", new_balance);
                     return Err(TestClientError::BadBalance(expected_balance, new_balance));
                 }
                 log::info!(self.logger, "Successful transfer");
@@ -491,12 +501,17 @@ impl TestClient {
                 if src_balance == 0 || tgt_balance == 0 {
                     return Err(TestClientError::ZeroBalance);
                 }
+                let debug_balance = source_client_lk.debug_balance();
+                let client_public_address = source_client_lk.get_account_key().default_subaddress();
+                log::info!(self.logger,"Debug balance for client at index {} with public key {}: {}", source_client_index, client_public_address, debug_balance);
 
                 Ok((src_balance, tgt_balance))
             },
         )?;
 
         let fee = source_client_lk.get_fee().unwrap_or(Mob::MINIMUM_FEE);
+        log::info!(self.logger, "fn test_transfer fee: {}", fee);
+
         let transfer_start = std::time::SystemTime::now();
         let (transaction, block_count) =
             self.transfer(&mut source_client_lk, &mut target_client_lk)?;
@@ -515,7 +530,7 @@ impl TestClient {
             tgt_balance,
             tgt_balance + self.policy.transfer_amount,
             self.policy.clone(),
-            Some(src_address_hash),
+            Some(src_address_hash.clone()),
             self.tx_info.clone(),
             self.health_tracker.clone(),
             self.logger.clone(),
@@ -536,6 +551,7 @@ impl TestClient {
         log::info!(self.logger, "Checking balance for source");
         tracer.in_span("ensure_expected_balance_after_block", |_cx| {
             self.ensure_expected_balance_after_block(
+                source_client_index,
                 &mut source_client_lk,
                 transaction_appeared,
                 src_balance - self.policy.transfer_amount - fee,
@@ -623,6 +639,10 @@ impl TestClient {
 
         let start_time = Instant::now();
         for ti in 0..num_transactions {
+            // FIXME: Should not be needed
+            log::debug!(self.logger, "sleeping");
+            std::thread::sleep(Duration::from_millis(5000));
+
             log::debug!(self.logger, "Transation: {:?}", ti);
 
             let source_index = ti % client_count;
@@ -636,6 +656,10 @@ impl TestClient {
                 target_client,
                 target_index,
             )?;
+
+            // FIXME: Should not be needed
+            log::debug!(self.logger, "sleeping");
+            std::thread::sleep(Duration::from_millis(5000));
 
             // Attempt double spend on the last transaction. This is an expensive test.
             if ti == num_transactions - 1 {
