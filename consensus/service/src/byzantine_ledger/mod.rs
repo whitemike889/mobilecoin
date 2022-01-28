@@ -111,10 +111,10 @@ impl ByzantineLedger {
                     let mut mint_txs = Vec::new();
 
                     // TODO avoid copies
-                    for value in scp_values.iter() {
+                    for value in scp_values.into_iter() {
                         match value {
                             ConsensusValue::TxHash(tx_hash) => tx_hashes.push(*tx_hash),
-                            ConsensusValue::Mint(mint_tx) => mint_txs.push(*mint_tx),
+                            ConsensusValue::Mint(mint_tx) => mint_txs.push(mint_tx.clone()),
                         }
                     }
                     let tx_hashes = tx_manager_combine.combine(&tx_hashes[..])?;

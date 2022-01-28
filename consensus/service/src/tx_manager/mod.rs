@@ -271,10 +271,10 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
         let mut mint_txs = Vec::new();
 
         // TODO avoid copies
-        for value in values.iter() {
+        for value in values.into_iter() {
             match value {
                 ConsensusValue::TxHash(tx_hash) => tx_hashes.push(*tx_hash),
-                ConsensusValue::Mint(mint_tx) => mint_txs.push(*mint_tx),
+                ConsensusValue::Mint(mint_tx) => mint_txs.push(mint_tx.clone()),
             }
         }
 
@@ -303,6 +303,9 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
             &root_element,
             &mint_txs,
         )?;
+
+        // TODO
+        log::info!(self.logger, "MINT TXS: {:?}", mint_txs);
 
         // TODO
         log::info!(self.logger, "MINT TXS: {:?}", mint_txs);
