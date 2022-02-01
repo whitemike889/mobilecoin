@@ -307,9 +307,6 @@ impl<E: ConsensusEnclave + Send, UI: UntrustedInterfaces + Send> TxManager
         // TODO
         log::info!(self.logger, "MINT TXS: {:?}", mint_txs);
 
-        // TODO
-        log::info!(self.logger, "MINT TXS: {:?}", mint_txs);
-
         // The enclave cannot provide a timestamp, so this happens in untrusted.
         signature.set_signed_at(chrono::Utc::now().timestamp() as u64);
 
