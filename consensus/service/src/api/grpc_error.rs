@@ -4,7 +4,10 @@ use crate::tx_manager::TxManagerError;
 use displaydoc::Display;
 use grpcio::{RpcStatus, RpcStatusCode};
 use mc_common::logger::global_log;
-use mc_consensus_api::consensus_common::{ProposeTxResponse, ProposeTxResult};
+use mc_consensus_api::{
+    consensus_client::MintResponse,
+    consensus_common::{ProposeTxResponse, ProposeTxResult},
+};
 use mc_consensus_enclave::Error as EnclaveError;
 use mc_ledger_db::Error as LedgerError;
 use mc_transaction_core::validation::TransactionValidationError;
@@ -121,6 +124,21 @@ impl From<ConsensusGrpcError> for Result<ProposeTxResponse, RpcStatus> {
                 resp.set_result(ProposeTxResult::from(err));
                 Ok(resp)
             }
+            _ => Err(RpcStatus::from(src)),
+        }
+    }
+}
+
+/// Convert a `ConsensusGrpcError` into either `MintResponse` or
+/// `RpcStatus`, depending on which error it holds.
+impl From<ConsensusGrpcError> for Result<MintResponse, RpcStatus> {
+    fn from(src: ConsensusGrpcError) -> Result<MintResponse, RpcStatus> {
+        match src {
+            /* ConsensusGrpcError::TransactionValidation(err) => {
+                let mut resp = ProposeTxResponse::new();
+                resp.set_result(ProposeTxResult::from(err));
+                Ok(resp)
+            } */
             _ => Err(RpcStatus::from(src)),
         }
     }

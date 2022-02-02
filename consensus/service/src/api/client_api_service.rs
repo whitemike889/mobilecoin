@@ -10,7 +10,7 @@ use crate::{
 };
 use grpcio::{RpcContext, RpcStatus, UnarySink};
 use mc_attest_api::attest::Message;
-use mc_common::logger::{log, Logger};
+use mc_common::logger::Logger;
 use mc_consensus_api::{
     consensus_client::MintResponse,
     consensus_client_grpc::ConsensusClientApi,
@@ -22,7 +22,7 @@ use mc_ledger_db::Ledger;
 use mc_peers::ConsensusValue;
 use mc_util_grpc::{rpc_logger, send_result, Authenticator};
 use mc_util_metrics::{self, SVC_COUNTERS};
-use std::sync::Arc;
+use std::{convert::TryFrom, sync::Arc};
 
 /// Maximum number of pending values for consensus service before rejecting
 /// add_transaction requests.
@@ -95,6 +95,24 @@ impl ClientApiService {
         counters::ADD_TX.inc();
         Ok(response)
     }
+
+    /// TODO
+    fn handle_mint_tx(&mut self, req: MintTx) -> Result<MintResponse, ConsensusGrpcError> {
+        // counters::MINT_TX_INITIATED.inc();
+
+        let mint_tx = mc_transaction_core::mint::MintTx::try_from(&req).map_err(|err| {
+            // counters::MINT_TX_ERROR_COUNTER.inc(&format!("{:?}", err));
+            ConsensusGrpcError::InvalidArgument(format!("Invalid MintTx: {}", err))
+        })?;
+        // TODO validate the transaction
+
+        // The transaction can be considered by the network.
+        (*self.propose_tx_callback)(ConsensusValue::Mint(mint_tx), None, None);
+        // counters::ADD_TX.inc();
+
+        let response = MintResponse::new();
+        Ok(response)
+    }
 }
 
 impl ConsensusClientApi for ClientApiService {
@@ -142,13 +160,31 @@ impl ConsensusClientApi for ClientApiService {
     }
 
     fn mint(&mut self, ctx: RpcContext, req: MintTx, sink: UnarySink<MintResponse>) {
-        log::info!(self.logger, "MINT REQ {:?}", req);
+        let _timer = SVC_COUNTERS.req(&ctx);
 
-        // (*self.propose_tx_callback)(ConsensusValue::Mint(mint_tx), None, None);
+        if let Err(err) = self.authenticator.authenticate_rpc(&ctx) {
+            return send_result(ctx, sink, err.into(), &self.logger);
+        }
 
-        let mut resp = MintResponse::new();
-        resp.set_block_count(self.ledger.num_blocks().unwrap());
-        send_result(ctx, sink, Ok(resp), &self.logger);
+        let mut result: Result<MintResponse, RpcStatus> =
+            if counters::CUR_NUM_PENDING_VALUES.get() >= PENDING_LIMIT {
+                ConsensusGrpcError::OverCapacity.into()
+            } else if !(self.is_serving_fn)() {
+                // This node is unable to process transactions (e.g. is syncing its ledger).
+                ConsensusGrpcError::NotServing.into()
+            } else {
+                self.handle_mint_tx(req).or_else(ConsensusGrpcError::into)
+            };
+
+        result = result.and_then(|mut response| {
+            let num_blocks = self.ledger.num_blocks().map_err(ConsensusGrpcError::from)?;
+            response.set_block_count(num_blocks);
+            Ok(response)
+        });
+
+        mc_common::logger::scoped_global_logger(&rpc_logger(&ctx, &self.logger), |logger| {
+            send_result(ctx, sink, result, logger)
+        });
     }
 }
 
