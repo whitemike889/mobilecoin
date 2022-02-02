@@ -30,6 +30,6 @@ pub struct MintTx {
 
     #[prost(uint64, tag = "5")]
     pub tombstone_block: u64,
-
-    // TODO: add a nonce here. The ledger will need to keep track of the nonce to ensure these transactions cannot be replayed indefinitely.
+    /* TODO: add a nonce here. The ledger will need to keep track of the nonce to ensure these
+     * transactions cannot be replayed indefinitely. */
 }

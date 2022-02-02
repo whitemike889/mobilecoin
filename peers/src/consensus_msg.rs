@@ -15,17 +15,7 @@ use std::{convert::TryFrom, hash::Hash, result::Result as StdResult};
 
 // TODO
 #[derive(
-    Clone,
-    Display,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    Digestible,
+    Clone, Display, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Digestible,
 )]
 pub enum ConsensusValue {
     /// TxHash({0})
