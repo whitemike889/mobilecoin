@@ -24,6 +24,7 @@ mod compressed_ristretto;
 mod curve_scalar;
 mod ed25519_signature;
 mod key_image;
+mod mint_tx;
 mod public_address;
 mod ring_mlsag;
 mod ristretto_private;

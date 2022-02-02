@@ -20,13 +20,13 @@ pub struct MintTx {
     // Note that we are not using PublicAddress here since right now it does not implement
     // Serialize/Deserialize and the mc_account_keys crate does not depend on serde.
     #[prost(message, required, tag = "3")]
-    view_public_key: RistrettoPublic,
+    pub view_public_key: RistrettoPublic,
 
     /// The recipient's public subaddress spend key `D`.
     // Note that we are not using PublicAddress here since right now it does not implement
     // Serialize/Deserialize and the mc_account_keys crate does not depend on serde.
     #[prost(message, required, tag = "4")]
-    spend_public_key: RistrettoPublic,
+    pub spend_public_key: RistrettoPublic,
 
     #[prost(uint64, tag = "5")]
     pub tombstone_block: u64,
