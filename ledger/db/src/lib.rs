@@ -628,9 +628,10 @@ impl LedgerDB {
         }
 
         // Non-origin blocks must have key images.
-        if block.index != 0 && block_contents.key_images.is_empty() {
-            return Err(Error::NoKeyImages);
-        }
+        // TODO: No longer true if we have only minting transactions.
+        // if block.index != 0 && block_contents.key_images.is_empty() {
+        //    return Err(Error::NoKeyImages);
+        // }
 
         // Check that the block contents match the hash.
         if block.contents_hash != block_contents.hash() {

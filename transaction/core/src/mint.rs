@@ -14,7 +14,7 @@ pub struct MintTx {
     pub amount: u64,
 
     #[prost(uint32, tag = "2")]
-    pub token_id: u32,
+    pub token_id: u32, // TODO unused
 
     /// The recipient's public subaddress view key 'C'.
     // Note that we are not using PublicAddress here since right now it does not implement

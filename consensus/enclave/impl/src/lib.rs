@@ -58,6 +58,9 @@ use rand_core::{CryptoRng, RngCore};
 /// Domain seperator for unified fees transaction private key.
 pub const FEES_OUTPUT_PRIVATE_KEY_DOMAIN_TAG: &str = "mc_fees_output_private_key";
 
+/// Domain seperator for minted output transaction private key.
+pub const MINTED_OUTPUT_PRIVATE_KEY_DOMAIN_TAG: &str = "mc_minted_output_private_key";
+
 include!(concat!(env!("OUT_DIR"), "/target_features.rs"));
 
 /// A well-formed transaction.
@@ -556,6 +559,19 @@ impl ConsensusEnclave for SgxConsensusEnclave {
             key_images.extend(tx.key_images().iter().cloned());
         }
         outputs.push(fee_output);
+
+        // Create outputs for all minting transactions.
+        for mint_tx in mint_txs.iter() {
+            let recipient = PublicAddress::new(&mint_tx.spend_public_key, &mint_tx.view_public_key);
+            let output = mint_output(
+                &recipient,
+                MINTED_OUTPUT_PRIVATE_KEY_DOMAIN_TAG.as_bytes(),
+                &parent_block,
+                &mint_txs,
+                mint_tx.amount,
+            )?;
+            outputs.push(output);
+        }
 
         // Sort outputs and key images. This removes ordering information which could be
         // used to infer the per-transaction relationships among outputs and/or
