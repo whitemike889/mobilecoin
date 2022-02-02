@@ -295,3 +295,17 @@ message VerificationReport {
     /// The raw report body JSON, as a byte sequence
     string http_body = 3;
 }
+
+/// TODO
+message MintTx {
+    uint64 amount = 1;
+    uint32 token_id = 2;
+
+    /// View public key
+    CompressedRistretto view_public_key = 3;
+
+    /// Spend public key
+    CompressedRistretto spend_public_key = 4;
+
+    uint64 tombstone_block = 5;
+}

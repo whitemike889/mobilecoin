@@ -16,7 +16,6 @@ use std::{convert::TryFrom, hash::Hash, result::Result as StdResult};
 // TODO
 #[derive(
     Clone,
-    Copy,
     Display,
     Debug,
     PartialEq,
