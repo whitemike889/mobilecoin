@@ -423,8 +423,8 @@ impl ConsensusEnclave for SgxConsensusEnclave {
         &self,
         parent_block: &Block,
         encrypted_txs_with_proofs: &[(WellFormedEncryptedTx, Vec<TxOutMembershipProof>)],
-        _root_element: &TxOutMembershipElement,
-        _mint_txs: &[MintTx],
+        root_element: &TxOutMembershipElement,
+        mint_txs: &[MintTx],
     ) -> Result<(Block, BlockContents, BlockSignature)> {
         // This implicitly converts Vec<Result<(Tx Vec<TxOutMembershipProof>),_>> into
         // Result<Vec<(Tx, Vec<TxOutMembershipProof>)>, _>, and terminates the
@@ -469,6 +469,14 @@ impl ConsensusEnclave for SgxConsensusEnclave {
 
         root_elements.sort();
         root_elements.dedup();
+
+        // For blocks that only contain mint transactions we are not going to have
+        // anything in root_elements. In that case we are going to revert to
+        // using the passed `root_element`. TODO: should root_element always end
+        // up being equal to root_elemets[0] when that is available? I think so...
+        if root_elements.is_empty() && !mint_txs.is_empty() {
+            root_elements.push(root_element.clone());
+        }
 
         if root_elements.len() != 1 {
             return Err(Error::InvalidLocalMembershipProof);
