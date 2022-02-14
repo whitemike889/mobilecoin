@@ -119,6 +119,7 @@ fn test_ingest_enclave(logger: Logger) {
             }
         }
 
+        log::info!(logger, "Line 125");
         // Check that Bob can decrypt the payloads for each tx row
         for idx in 0..10 {
             let tx_out_record = bob_fog_credential

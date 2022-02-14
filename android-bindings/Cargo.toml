@@ -35,11 +35,13 @@ mc-util-serial = { path = "../util/serial" }
 mc-util-uri = { path = "../util/uri" }
 mc-api = { path = "../api" }
 
-# third-party
 aes-gcm = { version = "0.9.4", default-features = false }
+android_logger = "0.10.1"
 anyhow = "1.0"
 displaydoc = { version = "0.2", default-features = false }
 jni = { version = "0.19.0", default-features = false }
+log = "0.4.14"
+hex = "0.4.3"
 protobuf = "2.22.1"
 rand = { version = "0.8", default-features = false }
 sha2 = { version = "0.9.8", default-features = false }
