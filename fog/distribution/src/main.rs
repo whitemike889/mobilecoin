@@ -26,7 +26,7 @@ use mc_transaction_core::{
     validation::TransactionValidationError,
     Token,
 };
-use mc_transaction_std::{EmptyMemoBuilder, InputCredentials, TransactionBuilder};
+use mc_transaction_std::{NoMemoBuilder, InputCredentials, TransactionBuilder};
 use mc_util_uri::FogUri;
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use rayon::prelude::*;
@@ -564,7 +564,7 @@ fn build_tx(
     assert_eq!(utxos_with_proofs.len(), rings.len());
 
     // Create tx_builder.
-    let mut tx_builder = TransactionBuilder::new(fog_resolver, EmptyMemoBuilder::default());
+    let mut tx_builder = TransactionBuilder::new(fog_resolver, NoMemoBuilder::default());
 
     tx_builder.set_fee(FEE.load(Ordering::SeqCst)).unwrap();
 
