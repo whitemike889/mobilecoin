@@ -520,7 +520,7 @@ impl TestClient {
             tgt_balance,
             tgt_balance + self.policy.transfer_amount,
             self.policy.clone(),
-            Some(src_address_hash),
+            Some(src_address_hash.clone()),
             self.tx_info.clone(),
             self.health_tracker.clone(),
             self.logger.clone(),
@@ -541,6 +541,8 @@ impl TestClient {
         log::info!(self.logger, "Checking balance for source");
         tracer.in_span("ensure_expected_balance_after_block", |_cx| {
             self.ensure_expected_balance_after_block(
+                src_address_hash,
+                source_client_index,
                 &mut source_client_lk,
                 transaction_appeared,
                 src_balance - self.policy.transfer_amount - fee,
