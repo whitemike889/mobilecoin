@@ -1,4 +1,5 @@
 git clean -fd
+service postgresql start
 export FOG_AUTHORITY_ROOT=$(./target/release/mc-crypto-x509-test-vectors --type=chain --test-name=ok_rsa_head)
 ./target/release/sample-keys --num 10 --seed=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 ./target/release/generate-sample-ledger --txs 100
