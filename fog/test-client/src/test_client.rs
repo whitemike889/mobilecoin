@@ -378,6 +378,8 @@ impl TestClient {
                     new_balance
                 );
                 if expected_balance != new_balance {
+                    let debug_balance = client.debug_balance();
+                    log::info!(self.logger, "WRONG BALANCE: {}", debug_balance);
                     return Err(TestClientError::BadBalance(expected_balance, new_balance));
                 }
                 log::info!(self.logger, "Successful transfer");
