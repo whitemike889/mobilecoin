@@ -347,6 +347,7 @@ impl TestClient {
     ///   block_index is included
     fn ensure_expected_balance_after_block(
         &self,
+        source_client_hash: ShortAddressHash,
         source_client_index: usize,
         client: &mut Client,
         block_index: BlockIndex,
@@ -373,16 +374,15 @@ impl TestClient {
                 let client_public_address = client.get_account_key().default_subaddress();
                 log::info!(
                     self.logger,
-                    "Expected balance for client index {}, public address {:?}: {:?} , and got: {:?}",
+                    "Expected balance for client index {}, hash {:?}: {:?} , and got: {:?}",
                     source_client_index,
-                    client_public_address,
+                    source_client_hash,
                     expected_balance,
                     new_balance
                 );
                 if expected_balance != new_balance {
                     let debug_balance = client.debug_balance();
-                    log::info!(self.logger, "WRONG BALANCE for client with public address {}: {}", client_public_address, debug_balance);
-                    log::info!(self.logger, "Balance Total: {}", new_balance);
+                    log::info!(self.logger, "WRONG BALANCE: {}", debug_balance);
                     return Err(TestClientError::BadBalance(expected_balance, new_balance));
                 }
                 log::info!(self.logger, "Successful transfer");
@@ -551,6 +551,7 @@ impl TestClient {
         log::info!(self.logger, "Checking balance for source");
         tracer.in_span("ensure_expected_balance_after_block", |_cx| {
             self.ensure_expected_balance_after_block(
+                src_address_hash,
                 source_client_index,
                 &mut source_client_lk,
                 transaction_appeared,
