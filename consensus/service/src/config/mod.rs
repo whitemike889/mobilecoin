@@ -101,6 +101,10 @@ pub struct Config {
     /// The configured block version
     #[structopt(long, env = "MC_BLOCK_VERSION", default_value = "1")]
     pub block_version: BlockVersion,
+
+    /// Verbosity level
+    #[structopt(short,long)]
+    pub verbose: bool
 }
 
 /// Decodes an Ed25519 private key.
