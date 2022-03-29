@@ -28,6 +28,5 @@
     "thread"
   ],
   "target-pointer-width": "64",
-  "target-family": "unix",
   "vendor": "mobilecoin"
 }
