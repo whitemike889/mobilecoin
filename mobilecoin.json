@@ -6,6 +6,7 @@
   "dynamic-linking": true,
   "env": "sgx",
   "executables": true,
+  "features": "+rdrnd",
   "llvm-target": "x86_64-mobilecoin-none-sgx",
   "max-atomic-width": 64,
   "os": "unknown",
@@ -27,5 +28,6 @@
     "thread"
   ],
   "target-pointer-width": "64",
+  "target-family": "unix",
   "vendor": "mobilecoin"
 }
