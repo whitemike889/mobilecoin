@@ -34,11 +34,15 @@
 //! it would create a strange coupling in the build process.
 
 #![deny(missing_docs)]
+#![feature(test)]
 
+extern crate test;
+
+use libc;
 use mc_common::logger::global_log;
 use std::{
-    alloc::{alloc, alloc_zeroed, dealloc, Layout},
     boxed::Box,
+    ptr,
     sync::atomic::{AtomicBool, AtomicU64, Ordering},
 };
 
@@ -54,9 +58,11 @@ struct UntrustedAllocation {
     data_item_size: usize,
     /// The size of a meta item in bytes
     meta_item_size: usize,
-    /// The pointer to the data items
+    /// The pointer to the data items that are stored in memory mapped to
+    /// a file using mmap.
     data_pointer: *mut u64,
-    /// The pointer to the meta items
+    /// The pointer to the meta items that are stored in memory mapped to
+    /// a file using mmap.
     meta_pointer: *mut u64,
     /// A flag set to true when a thread is in the critical section and released
     /// when it leaves. This is used to trigger assertions if there is a
@@ -101,8 +107,31 @@ impl UntrustedAllocation {
             meta_item_size
         );
 
-        let data_pointer = unsafe {
-            alloc(Layout::from_size_align(count * data_item_size, 8).unwrap()) as *mut u64
+        let data_pointer: *mut libc::c_void = unsafe {
+            // We do not care about setting a specific address in memory.
+            let memory_start_address: *mut libc::c_void = ptr::null_mut();
+            // TODO: Figure out if you need to take alignment into account...
+            let memory_length: libc::size_t = count * data_item_size;
+            let file_protections: libc::c_int = libc::PROT_READ | libc::PROT_WRITE;
+            // We use:
+            // - MAP_PRIVATE because no other process needs to access the underlying file.
+            // - MAP_ANONYMOUS because we need to use are about the actual file
+            // - MAP_UNINITIALIZED because we don't want the kernel to spend time zeroing
+            //   out this data. NOTE: This requires the CONFIG_MMAP_ALLOW_UNINITIALIZED
+            //   option to be configured for the kernel.
+            let flags: libc::c_int = libc::MAP_PRIVATE | libc::MAP_ANONYMOUS;
+            // We are using an anymous map, which means we are not interfacing
+            // with a file.
+            let file_descriptor: libc::c_int = -1;
+            let offset: libc::off_t = 0;
+            libc::mmap(
+                memory_start_address,
+                memory_length,
+                file_protections,
+                flags,
+                file_descriptor,
+                offset,
+            )
         };
         if data_pointer.is_null() {
             panic!(
@@ -110,8 +139,27 @@ impl UntrustedAllocation {
                 count * data_item_size
             )
         }
-        let meta_pointer = unsafe {
-            alloc_zeroed(Layout::from_size_align(count * meta_item_size, 8).unwrap()) as *mut u64
+        let meta_pointer: *mut libc::c_void = unsafe {
+            // We do not care about setting a specific address in memory.
+            let memory_start_address: *mut libc::c_void = ptr::null_mut();
+            let memory_length: libc::size_t = count * meta_item_size;
+            let file_protections: libc::c_int = libc::PROT_READ | libc::PROT_WRITE;
+            // We use:
+            //  - MAP_PRIVATE because no other process needs to access the underlying file.
+            //  - MAP_ANONYMOUS because we need to use are about the actual file
+            let flags: libc::c_int = libc::MAP_PRIVATE | libc::MAP_ANONYMOUS;
+            // We are using an anymous map, which means we are not interfacing
+            // with a file.
+            let file_descriptor: libc::c_int = -1;
+            let offset: libc::off_t = 0;
+            libc::mmap(
+                memory_start_address,
+                memory_length,
+                file_protections,
+                flags,
+                file_descriptor,
+                offset,
+            )
         };
         if meta_pointer.is_null() {
             panic!(
@@ -127,8 +175,8 @@ impl UntrustedAllocation {
             count,
             data_item_size,
             meta_item_size,
-            data_pointer,
-            meta_pointer,
+            data_pointer: data_pointer as *mut u64,
+            meta_pointer: meta_pointer as *mut u64,
             critical_section_flag,
             checkout_flag,
         }
@@ -138,13 +186,13 @@ impl UntrustedAllocation {
 impl Drop for UntrustedAllocation {
     fn drop(&mut self) {
         unsafe {
-            dealloc(
-                self.data_pointer as *mut u8,
-                Layout::from_size_align_unchecked(self.count * self.data_item_size, 8),
+            libc::munmap(
+                self.data_pointer as *mut libc::c_void,
+                self.count * self.data_item_size,
             );
-            dealloc(
-                self.meta_pointer as *mut u8,
-                Layout::from_size_align_unchecked(self.count * self.meta_item_size, 8),
+            libc::munmap(
+                self.meta_pointer as *mut libc::c_void,
+                self.count * self.meta_item_size,
             );
             let mem_kb = compute_mem_kb(self.count, self.data_item_size, self.meta_item_size);
             TOTAL_MEM_FOOTPRINT_KB.fetch_sub(mem_kb, Ordering::SeqCst);
@@ -217,6 +265,7 @@ pub unsafe extern "C" fn checkout_oram_storage(
     metabuf: *mut u64,
     metabuf_len: usize,
 ) {
+    global_log::info!("checkout_oram_storage: id = {}, idx = {:?}, idx_len = {}, databuf = {:?}, databuf_len = {}, metabuf = {:?}, metabuf_len = {}", id, idx, idx_len, databuf, databuf_len, metabuf, metabuf_len);
     #[cfg(debug_assertions)]
     debug_checks::check_id(id);
     let ptr: *const UntrustedAllocation = core::mem::transmute(id);
@@ -289,6 +338,7 @@ pub unsafe extern "C" fn checkin_oram_storage(
     metabuf: *const u64,
     metabuf_len: usize,
 ) {
+    global_log::info!("checkin_oram_storage: id = {}, idx = {:?}, idx_len = {}, databuf = {:?}, databuf_len = {}, metabuf = {:?}, metabuf_len = {}", id, idx, idx_len, databuf, databuf_len, metabuf, metabuf_len);
     #[cfg(debug_assertions)]
     debug_checks::check_id(id);
     let ptr: *const UntrustedAllocation = core::mem::transmute(id);
@@ -359,4 +409,74 @@ mod debug_checks {
     lazy_static::lazy_static! {
         static ref VALID_IDS: Mutex<BTreeSet<u64>> = Mutex::new(Default::default());
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test::Bencher;
+
+    #[bench]
+    fn bench_allocate_oram_storage(b: &mut Bencher) {
+        //let count = 57344;
+        let count = 1000;
+        let data_size = 4096;
+        let meta_size = 104;
+        let mut id: u64 = 0;
+        let id_out: *mut u64 = &mut id;
+
+        unsafe {
+            b.iter(|| allocate_oram_storage(count, data_size, meta_size, id_out));
+            release_oram_storage(*id_out);
+        }
+    }
+
+    #[bench]
+    fn bench_checkout_checkin_oram_storage(b: &mut Bencher) {
+        //let count = 57344;
+        let count = 1000;
+        let data_size = 4096;
+        let meta_size = 104;
+        let mut id: u64 = 0;
+        let id_out: *mut u64 = &mut id;
+
+        unsafe {
+            allocate_oram_storage(count, data_size, meta_size, id_out);
+            let checkout_idx: [u64; 10] = [0; 10];
+            let mut checkout_databuf: [u64; 5120] = [0; 5120];
+            let mut checkout_metabuf: [u64; 130] = [0; 130];
+
+            let checkin_idx: [u64; 10] = [0; 10];
+            let checkin_databuf: [u64; 5120] = [2; 5120];
+            let checkin_metabuf: [u64; 130] = [3; 130];
+
+            b.iter(|| {
+                checkout_oram_storage(
+                    *id_out,
+                    checkout_idx.as_ptr(),
+                    checkout_idx.len(),
+                    checkout_databuf.as_mut_ptr(),
+                    checkout_databuf.len(),
+                    checkout_metabuf.as_mut_ptr(),
+                    checkout_metabuf.len(),
+                );
+                checkin_oram_storage(
+                    *id_out,
+                    &checkin_idx as *const u64,
+                    checkin_idx.len(),
+                    &checkin_databuf as *const u64,
+                    checkin_databuf.len(),
+                    &checkin_metabuf as *const u64,
+                    checkin_metabuf.len(),
+                );
+            });
+
+            release_oram_storage(*id_out);
+            println!("Released oram storage: {}", *id_out);
+        }
+    }
+
+    // #[bench]
+    // fn bench_checkout_oram_storage(b: &mut Bencher) {
+    // }
 }
