@@ -3,3 +3,4 @@ target = "../../../mobilecoin.json"
 
 [unstable]
 build-std = ["core", "alloc"]
+features = ["host_dep"]
