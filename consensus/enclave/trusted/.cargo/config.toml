@@ -1,5 +1,5 @@
 [build]
-target = "../../../mobilecoin.json"
+target = "../../../x86_64-unknown-linux-gnu.json"
 
 [unstable]
 build-std = ["core", "alloc"]
