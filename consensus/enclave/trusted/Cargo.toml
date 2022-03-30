@@ -72,10 +72,8 @@ curve25519-dalek = { git = "https://github.com/mobilecoinfoundation/curve25519-d
 ed25519-dalek = { git = "https://github.com/mobilecoinfoundation/ed25519-dalek.git", rev = "4194e36abc75722e6fba7d552e719448fc38c51f" }
 
 # Our patches for newer bindgen, no-std
-# mbedtls = { git = "https://github.com/mobilecoinofficial/rust-mbedtls.git", rev = "6be881d18929d079a2702272a309ce807a02997f" }
-# mbedtls-sys-auto = { git = "https://github.com/mobilecoinofficial/rust-mbedtls.git", rev = "6be881d18929d079a2702272a309ce807a02997f" }
-mbedtls = { path = "../../../../rust-mbedtls/mbedtls" }
-mbedtls-sys-auto = { path = "../../../../rust-mbedtls/mbedtls-sys" }
+mbedtls = { git = "https://github.com/mobilecoinofficial/rust-mbedtls.git", rev = "d386bc2bb147eab6a8a23eb3b5f8510928b73125" }
+mbedtls-sys-auto = { git = "https://github.com/mobilecoinofficial/rust-mbedtls.git", rev = "d386bc2bb147eab6a8a23eb3b5f8510928b73125" }
 
 # Fork and rename to use "OG" dalek-cryptography.
 schnorrkel-og = { git = "https://github.com/mobilecoinfoundation/schnorrkel.git", rev = "5c98ae068ee4652d6df6463b549fbf2d5d132faa" }
@@ -87,5 +85,3 @@ serde_cbor = { git = "https://github.com/mobilecoinofficial/cbor", rev = "4c886a
 
 # Fix issues with recent nightlies, bump curve25519-dalek version
 x25519-dalek = { git = "https://github.com/mobilecoinfoundation/x25519-dalek.git", rev = "c1966b8743d320cd07a54191475e5c0f94b2ea30" }
-
-bindgen = { path = "../../../../rust-bindgen" }
