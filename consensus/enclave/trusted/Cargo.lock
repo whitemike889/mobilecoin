@@ -106,8 +106,6 @@ checksum = "383d29d513d8764dcdc42ea295d979eb99c3c9f00607b3692cf68a431f7dca72"
 [[package]]
 name = "bindgen"
 version = "0.58.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f8523b410d7187a43085e7e064416ea32ded16bd0a4e6fc025e21616d01258f"
 dependencies = [
  "bitflags",
  "cexpr",
@@ -615,7 +613,6 @@ checksum = "7ffc5c5338469d4d3ea17d269fa8ea3512ad247247c30bd2df69e68309ed0a08"
 [[package]]
 name = "mbedtls"
 version = "0.8.1"
-source = "git+https://github.com/mobilecoinofficial/rust-mbedtls.git?rev=6be881d18929d079a2702272a309ce807a02997f#6be881d18929d079a2702272a309ce807a02997f"
 dependencies = [
  "bitflags",
  "byteorder",
@@ -634,7 +631,6 @@ dependencies = [
 [[package]]
 name = "mbedtls-sys-auto"
 version = "2.26.1"
-source = "git+https://github.com/mobilecoinofficial/rust-mbedtls.git?rev=6be881d18929d079a2702272a309ce807a02997f#6be881d18929d079a2702272a309ce807a02997f"
 dependencies = [
  "bindgen",
  "cc",
