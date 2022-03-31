@@ -1,5 +1,5 @@
 [build]
-target = "../../../x86_64-mobilecoin-none-sgx.json"
+target = "../../../../x86_64-mobilecoin-none-sgx.json"
 # target = "x86_64-mobilecoin-none-sgx"
 
 [unstable]
