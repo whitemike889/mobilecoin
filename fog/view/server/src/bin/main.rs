@@ -5,7 +5,7 @@
 use grpcio::{RpcStatus, RpcStatusCode};
 use mc_attest_net::{Client, RaClient};
 use mc_common::{logger::log, time::SystemTimeProvider};
-use mc_fog_sql_recovery_db::SqlRecoveryDb;
+use mc_fog_sql_recovery_db::{inserter, SqlRecoveryDb};
 use mc_fog_view_enclave::{SgxViewEnclave, ENCLAVE_FILE};
 use mc_fog_view_server::{config::MobileAcctViewConfig, server::ViewServer};
 use mc_util_cli::ParserWithBuildInfo;
@@ -25,6 +25,9 @@ fn main() {
         logger.clone(),
     )
     .expect("Failed connecting to database");
+
+    let pool = recovery_db.get_pool();
+    inserter::insert_test_data(&pool);
 
     let _tracer = mc_util_telemetry::setup_default_tracer_with_tags(
         env!("CARGO_PKG_NAME"),

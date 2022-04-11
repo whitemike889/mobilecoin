@@ -3902,6 +3902,16 @@ dependencies = [
  "lazy_static",
  "libc",
  "mc-common",
+ "mc-crypto-keys",
+ "mc-crypto-rand",
+ "mc-fog-kex-rng",
+ "mc-fog-sql-recovery-db",
+ "mc-fog-test-infra",
+ "mc-fog-types",
+ "mc-util-from-random",
+ "mc-util-serial",
+ "rand 0.8.5",
+ "rand_core 0.6.3",
 ]
 
 [[package]]

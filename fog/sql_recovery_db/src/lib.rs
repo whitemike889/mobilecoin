@@ -13,9 +13,13 @@ pub mod test_utils;
 
 mod error;
 mod models;
-mod proto_types;
+/// Yo
+pub mod proto_types;
 mod schema;
 mod sql_types;
+
+/// This inserts test data for Fog View testing.
+pub mod inserter;
 
 use crate::sql_types::{SqlCompressedRistrettoPublic, UserEventType};
 use clap::Parser;
@@ -130,6 +134,11 @@ impl SqlRecoveryDb {
             config,
             logger,
         }
+    }
+
+    /// YO
+    pub fn get_pool(&self) -> &Pool<ConnectionManager<PgConnection>> {
+        &self.pool
     }
 
     /// Create a new instance using a database URL,
