@@ -546,6 +546,7 @@ where
         block_index: u64,
         records: Vec<ETxOutRecord>,
     ) {
+        log::info!(self.logger, "Adding {} ETxOutRecords to the enclave", records.len());
         let num_records = records.len();
 
         let add_records_result = {

@@ -340,6 +340,7 @@ docker_run = ["docker",
               # container doesn't know mount_point so we have to set this
               "--env", "CARGO_HOME=" + mount_point + "/cargo",
               "--volume", mount_from + ":" + mount_point,
+              "--device", "/dev/sdc:/dev/sdc",
               "--workdir", workdir]
 
 # Add /dev/isgx if HW mode, and it is available

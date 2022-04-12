@@ -42,9 +42,12 @@ use libc;
 use mc_common::logger::global_log;
 use std::{
     boxed::Box,
+    ffi::CString,
     ptr,
     sync::atomic::{AtomicBool, AtomicU64, Ordering},
 };
+
+const MOUNTED_DEVICE_PATH: &str = "/dev/sdc";
 
 /// Resources held on untrusted side in connection to an allocation request by
 /// enclave
@@ -110,20 +113,14 @@ impl UntrustedAllocation {
         let data_pointer: *mut libc::c_void = unsafe {
             // We do not care about setting a specific address in memory.
             let memory_start_address: *mut libc::c_void = ptr::null_mut();
-            // TODO: Figure out if you need to take alignment into account...
             let memory_length: libc::size_t = count * data_item_size;
             let file_protections: libc::c_int = libc::PROT_READ | libc::PROT_WRITE;
-            // We use:
-            // - MAP_PRIVATE because no other process needs to access the underlying file.
-            // - MAP_ANONYMOUS because we need to use are about the actual file
-            // - MAP_UNINITIALIZED because we don't want the kernel to spend time zeroing
-            //   out this data. NOTE: This requires the CONFIG_MMAP_ALLOW_UNINITIALIZED
-            //   option to be configured for the kernel.
-            let flags: libc::c_int = libc::MAP_PRIVATE | libc::MAP_ANONYMOUS;
-            // We are using an anymous map, which means we are not interfacing
-            // with a file.
-            let file_descriptor: libc::c_int = -1;
+            // Use MAP_PRIVATE because no other process needs to access the underlying file.
+            let flags: libc::c_int = libc::MAP_PRIVATE;
             let offset: libc::off_t = 0;
+            let file_name = CString::new(MOUNTED_DEVICE_PATH).unwrap();
+            let file_descriptor =
+                libc::open(file_name.as_ptr() as *const libc::c_char, libc::O_RDWR);
             libc::mmap(
                 memory_start_address,
                 memory_length,
@@ -139,6 +136,7 @@ impl UntrustedAllocation {
                 count * data_item_size
             )
         }
+
         let meta_pointer: *mut libc::c_void = unsafe {
             // We do not care about setting a specific address in memory.
             let memory_start_address: *mut libc::c_void = ptr::null_mut();
@@ -146,7 +144,8 @@ impl UntrustedAllocation {
             let file_protections: libc::c_int = libc::PROT_READ | libc::PROT_WRITE;
             // We use:
             //  - MAP_PRIVATE because no other process needs to access the underlying file.
-            //  - MAP_ANONYMOUS because we need to use are about the actual file
+            //  - MAP_ANONYMOUS because we don't need to map to a particular device for meta
+            //    since it doesn't require a lot of memory (unlike data).
             let flags: libc::c_int = libc::MAP_PRIVATE | libc::MAP_ANONYMOUS;
             // We are using an anymous map, which means we are not interfacing
             // with a file.
@@ -265,7 +264,7 @@ pub unsafe extern "C" fn checkout_oram_storage(
     metabuf: *mut u64,
     metabuf_len: usize,
 ) {
-    global_log::info!("checkout_oram_storage: id = {}, idx = {:?}, idx_len = {}, databuf = {:?}, databuf_len = {}, metabuf = {:?}, metabuf_len = {}", id, idx, idx_len, databuf, databuf_len, metabuf, metabuf_len);
+    global_log::trace!("checkout_oram_storage: id = {}, idx = {:?}, idx_len = {}, databuf = {:?}, databuf_len = {}, metabuf = {:?}, metabuf_len = {}", id, idx, idx_len, databuf, databuf_len, metabuf, metabuf_len);
     #[cfg(debug_assertions)]
     debug_checks::check_id(id);
     let ptr: *const UntrustedAllocation = core::mem::transmute(id);
@@ -338,7 +337,7 @@ pub unsafe extern "C" fn checkin_oram_storage(
     metabuf: *const u64,
     metabuf_len: usize,
 ) {
-    global_log::info!("checkin_oram_storage: id = {}, idx = {:?}, idx_len = {}, databuf = {:?}, databuf_len = {}, metabuf = {:?}, metabuf_len = {}", id, idx, idx_len, databuf, databuf_len, metabuf, metabuf_len);
+    global_log::trace!("checkin_oram_storage: id = {}, idx = {:?}, idx_len = {}, databuf = {:?}, databuf_len = {}, metabuf = {:?}, metabuf_len = {}", id, idx, idx_len, databuf, databuf_len, metabuf, metabuf_len);
     #[cfg(debug_assertions)]
     debug_checks::check_id(id);
     let ptr: *const UntrustedAllocation = core::mem::transmute(id);
