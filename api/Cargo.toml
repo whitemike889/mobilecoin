@@ -9,6 +9,8 @@ links = "mc-api"
 [dependencies]
 mc-account-keys = { path = "../account-keys" }
 mc-attest-core = { path = "../attest/core" }
+mc-common = { path = "../common" }
+mc-consensus-scp = { path = "../consensus/scp" }
 mc-crypto-keys = { path = "../crypto/keys" }
 mc-transaction-core = { path = "../transaction/core" }
 mc-util-repr-bytes = { path = "../util/repr-bytes" }
@@ -33,6 +35,7 @@ mc-util-build-script = { path = "../util/build/script" }
 cargo-emit = "0.2.1"
 
 [dev-dependencies]
+mc-consensus-scp = { path = "../consensus/scp", features = ["test_utils"] }
 mc-crypto-x509-test-vectors = { path = "../crypto/x509/test-vectors" }
 mc-test-vectors-b58-encodings = { path = "../test-vectors/b58-encodings" }
 mc-transaction-core-test-utils = { path = "../transaction/core/test-utils" }

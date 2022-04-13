@@ -2,7 +2,13 @@
 
 //! QuorumSet helpers for tests.
 
-use mc_consensus_scp::{test_utils::test_node_id, QuorumSet, QuorumSetMember};
+use mc_transaction_core::{QuorumNode, QuorumSet, QuorumSetMember};
+
+/// Creates NodeID from integer for testing.
+pub fn test_node_id(id: u32) -> QuorumNode {
+    let scp_node = mc_consensus_scp::test_utils::test_node_id(id);
+    (&scp_node).into()
+}
 
 /// Create a QuorumSet for tests.
 pub fn make_quorum_set() -> QuorumSet {

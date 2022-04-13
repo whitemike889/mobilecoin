@@ -3071,6 +3071,8 @@ dependencies = [
  "generic-array 0.14.5",
  "mc-account-keys",
  "mc-attest-core",
+ "mc-common",
+ "mc-consensus-scp",
  "mc-crypto-keys",
  "mc-crypto-x509-test-vectors",
  "mc-test-vectors-b58-encodings",
@@ -5030,11 +5032,7 @@ dependencies = [
  "mc-transaction-core",
  "mc-util-build-grpc",
  "mc-util-build-script",
- "mc-util-from-random",
  "protobuf",
- "rand 0.8.5",
- "rand_core 0.6.3",
- "rand_hc 0.3.1",
 ]
 
 [[package]]
@@ -5078,7 +5076,6 @@ dependencies = [
  "mc-api",
  "mc-common",
  "mc-crypto-keys",
- "mc-crypto-rand",
  "mc-ledger-db",
  "mc-ledger-streaming-api",
  "mc-util-grpc",
@@ -5492,6 +5489,7 @@ dependencies = [
  "hkdf",
  "lazy_static",
  "mc-account-keys",
+ "mc-attest-core",
  "mc-common",
  "mc-crypto-box",
  "mc-crypto-digestible",

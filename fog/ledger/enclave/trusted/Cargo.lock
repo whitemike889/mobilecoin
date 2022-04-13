@@ -1264,6 +1264,7 @@ dependencies = [
  "hkdf",
  "lazy_static",
  "mc-account-keys",
+ "mc-attest-core",
  "mc-common",
  "mc-crypto-box",
  "mc-crypto-digestible",
