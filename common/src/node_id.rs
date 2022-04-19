@@ -1,8 +1,8 @@
 // Copyright (c) 2018-2021 The MobileCoin Foundation
 
-//! The Node ID type
+//! The Node ID types.
 
-use crate::responder_id::ResponderId;
+use crate::ResponderId;
 use binascii::ConvertError as BinConvertError;
 use core::{
     cmp::Ordering,
