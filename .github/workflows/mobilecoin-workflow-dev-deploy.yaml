@@ -78,6 +78,9 @@ on:
       DOCKERHUB_USERNAME:
         description: "Docker hub creds"
         required: false
+      IP_INFO_TOKEN:
+        description: "ipinfo.io token for authenticated access"
+        required: true
 
 jobs:
   list-values:
@@ -185,7 +188,7 @@ jobs:
         LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
         FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
         FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
-        TOKENS_SIGNED_JSON: ${{ steps.tokens_config.outputs.tokens_singed_json }}
+        IP_INFO_TOKEN: ${{ secrets.IP_INFO_TOKEN }}
       run: |
         mkdir -p .tmp/values/
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml

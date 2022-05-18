@@ -60,6 +60,10 @@ spec:
             - "-addr=:3229"
           failureThreshold: 4
           periodSeconds: 30
+        envFrom:
+        - secretRef:
+            name: ipinfo
+            optional: true
         env:
         - name: "RUST_BACKTRACE"
           value: "full"

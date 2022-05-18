@@ -46,6 +46,9 @@ spec:
             name: fog-ingest
         - secretRef:
             name: ias
+        - secretRef:
+            name: ipinfo
+            optional: true
         env:
         - name: RUST_BACKTRACE
           value: {{ .Values.fogIngest.rust.backtrace | quote }}

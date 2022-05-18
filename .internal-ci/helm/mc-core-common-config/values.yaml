@@ -1,6 +1,4 @@
 # Copyright (c) 2018-2022 The MobileCoin Foundation
-
-
 clientAuth:
   token: ''
 
@@ -11,6 +9,9 @@ ias:
 mobileCoinNetwork:
   network: ''
   partner: ''
+
+ipinfo:
+  token: ''
 
 sentry:
   consensus-sentry-dsn: ''

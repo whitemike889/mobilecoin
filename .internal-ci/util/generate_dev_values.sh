@@ -51,6 +51,8 @@ global:
 $(echo -n "${tokens_signed_json}" | sed 's/^/        /')
 
 mcCoreCommonConfig:
+  ipinfo:
+    token: '${IP_INFO_TOKEN}'
   ias:
     key: '${IAS_KEY}'
     spid: '${IAS_SPID}'
