@@ -109,5 +109,5 @@ spec:
       volumes:
       - name: minting-keys
         secret:
-          name: consensus-minting-secrets
+          secretName: consensus-minting-secrets
           optional: true

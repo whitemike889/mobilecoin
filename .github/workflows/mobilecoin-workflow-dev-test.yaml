@@ -56,7 +56,7 @@ jobs:
         echo fog_test_client ${{ inputs.fog_test_client }}
         echo mobilecoind_integration ${{ inputs.mobilecoind_integration }}
 
-  recreate-keys:
+  setup-environment:
     runs-on: [self-hosted, Linux, small]
     env:
       FOG_REPORT_SIGNING_CA_CERT_PATH: .tmp/fog_report_signing_ca_cert.pem
@@ -72,6 +72,7 @@ jobs:
       run: |
         .internal-ci/util/generate_wallet_seeds.sh
 
+    # CBB - Make these things secrets in the target namespace and optional volumes on toolbox.
     - name: Write Fog Report Authority Root CA cert
       run: |
         mkdir -p .tmp
@@ -101,6 +102,7 @@ jobs:
         command: |
           rm -rf /tmp/sample_data
 
+    # CBB - Make these things secrets in the target namespace and optional volumes on toolbox.
     - name: Recreate Keys for Testing
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
@@ -121,7 +123,7 @@ jobs:
   fog-distribution:
     runs-on: [self-hosted, Linux, small]
     needs:
-    - recreate-keys
+    - setup-environment
     steps:
     - name: Test - fog-distribution
       if: inputs.fog_distribution == 'true'
@@ -181,3 +183,54 @@ jobs:
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         command: |
           /test/mobilecoind-integration-test.sh
+
+  minting:
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    - mobilecoind-integration
+    steps:
+    # minting keys should be available as as secret in the cluster and presented
+    # to toolbox as a secret/volume at /minting-keys
+    - name: Test- MintConfigTx - id1
+      if: inputs.minting == 'true'
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
+      with:
+        action: toolbox-exec
+        ingest_color: ${{ inputs.ingest_color }}
+        namespace: ${{ inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          mc-consensus-mint-client generate-and-submit-mint-config-tx \
+            --node mc://node1.${NETWORK_FROM_BRANCH}.mobilecoin.com/ \
+            --signing-key /minting-keys/master-minter1.private.pem \
+            --token-id 1 \
+            --config 1000000000:1:/minting-keys/token1-signer.public.pem \
+            --total-mint-limit 10000000000
+
+    - name: Test - mint 1M tokens - id1
+      if: inputs.minting == 'true'
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
+      with:
+        action: toolbox-exec
+        ingest_color: ${{ inputs.ingest_color }}
+        namespace: ${{ inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          for ACCOUNT_NUM in $(seq 0 6); do
+            mc-consensus-mint-client generate-and-submit-mint-tx \
+                        --node mc://node1.${{ inputs.namespace }}.development.mobilecoin.com/ \
+                        --signing-key token1-signer.private \
+                        --recipient $(cat keys/account_keys_${ACCOUNT_NUM}.b58pub) \
+                        --token-id 1 \
+                        --amount 1000000
+                    done
+          mc-consensus-mint-client generate-and-submit-mint-config-tx \
+            --node mc://node1.${NETWORK_FROM_BRANCH}.mobilecoin.com/ \
+            --signing-key /minting-keys/master-minter1.private.pem \
+            --token-id 1 \
+            --config 1000000000:1:/minting-keys/token1-signer.public.pem \
+            --total-mint-limit 10000000000
