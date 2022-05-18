@@ -9,7 +9,7 @@ set -e
 set -x
 
 source_org=mobilecoin
-source_tag=demo-v20220307170316
+source_tag=v1.1.3-dev
 
 push_org=mobilecoin
 push_tag=v1.1.3-dev
@@ -31,6 +31,8 @@ docker cp "bootstrap-tools:/usr/local/bin/generate-sample-ledger" ./
 docker cp "bootstrap-tools:/usr/local/bin/sample-keys" ./
 docker cp "bootstrap-tools:/usr/local/bin/fog-distribution" ./
 docker cp "bootstrap-tools:/usr/local/bin/fog_ingest_client" ./
+docker cp "bootstrap-tools:/usr/local/bin/mc-consensus-mint-client" ./
+docker cp "bootstrap-tools:/usr/local/bin/mc-util-seeded-ed25519-key-gen" ./
 docker cp "fog-ledger:/usr/bin/libledger-enclave.signed.so" ./
 docker cp "fog-ledger:/usr/bin/ledger_server" ./
 docker cp "fog-ledger:/usr/bin/mobilecoind" ./
@@ -57,7 +59,7 @@ do
         --build-arg="GO_BIN_PATH=target/release" \
         --build-arg="REPO_ORG=${push_org}" \
         -f ".internal-ci/docker/Dockerfile.${i}" \
-        ./
+        .
 done
 
 for i in "${images[@]}"
@@ -78,5 +80,7 @@ done
 
 for c in "${charts[@]}"
 do
+    # helm repo add mcf-public --username <your-name> \
+    #   https://harbor.mobilecoin.com/chartrepo/mobilecoinfoundation-public
     helm cm-push --force ".tmp/charts/${c}-${push_tag}.tgz" mcf-public
 done
