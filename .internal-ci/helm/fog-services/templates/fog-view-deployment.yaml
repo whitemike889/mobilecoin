@@ -123,7 +123,7 @@ spec:
             - "/usr/local/bin/grpc_health_probe"
             - "-addr=:3225"
           failureThreshold: 2
-          periodSeconds: 30
+          periodSeconds: 10
         volumeMounts:
         - name: aesm-socket-dir
           mountPath: /var/run/aesmd

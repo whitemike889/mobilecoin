@@ -111,7 +111,7 @@ spec:
             - "/usr/local/bin/grpc_health_probe"
             - "-addr=:3222"
           failureThreshold: 2
-          periodSeconds: 30
+          periodSeconds: 10
         volumeMounts:
         - name: supervisor-conf
           mountPath: /etc/supervisor/conf.d
