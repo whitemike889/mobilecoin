@@ -58,6 +58,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        volumeMounts:
+        - name: minting-keys
+          mountPath: /minting-keys
+          readOnly: true
       {{- if eq .Values.jaegerTracing.enabled true }}
       - name: jaeger-agent
         image: jaegertracing/jaeger-agent:latest
@@ -102,3 +106,8 @@ spec:
         {{- toYaml .Values.toolbox.nodeSelector | nindent 8 }}
       tolerations:
         {{- toYaml .Values.toolbox.tolerations | nindent 8 }}
+      volumes:
+      - name: minting-keys
+        secret:
+          name: consensus-minting-secrets
+          optional: true

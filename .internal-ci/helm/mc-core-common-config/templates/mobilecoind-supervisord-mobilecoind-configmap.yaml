@@ -18,7 +18,6 @@ data:
       --ledger-db /data/ledger
       --watcher-db /data/watcher
       --mobilecoind-db /data/mobilecoind
-      --ledger-db-migrate
       --listen-uri insecure-mobilecoind://0.0.0.0:3229/
 
     stdout_logfile=/dev/fd/1
