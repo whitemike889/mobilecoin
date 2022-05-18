@@ -1,0 +1,24 @@
+name: Mobilecoin Seeds Cache
+description: Standardized cache setup for seeds
+
+inputs:
+  path:
+    description: "path to mount cache"
+    required: false
+    default: |
+      .tmp/seeds
+
+outputs:
+  cache-hit:
+    description: "did we get a cache hit?"
+    value: ${{ steps.wallet_seeds.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+  - name: Cache wallet seeds
+    id: wallet_seeds
+    uses: actions/cache@v3
+    with:
+      path: ${{ inputs.path }}
+      key: ${{ github.ref_name }}-seeds
