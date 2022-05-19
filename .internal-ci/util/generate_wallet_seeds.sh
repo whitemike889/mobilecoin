@@ -47,7 +47,7 @@ fi
 
 if [[ ! -f "${BASE_PATH}/mnemonic_fog_keys_seed" ]] && [[ ! -s "${BASE_PATH}/mnemonic_fog_keys_seed" ]]
 then
-    echo "--- Create mnemonic keys seed ---"
+    echo "--- Create mnemonic fog keys seed ---"
     MNEMONIC_FOG_KEYS_SEED=$(openssl rand -hex 32)
     echo "::add-mask::${MNEMONIC_FOG_KEYS_SEED}"
     echo -n "${MNEMONIC_FOG_KEYS_SEED}" > "${BASE_PATH}/mnemonic_fog_keys_seed"

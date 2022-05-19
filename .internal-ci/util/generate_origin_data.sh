@@ -60,7 +60,7 @@ then
     echo ""
     echo "-- Generate mnemonic non-fog keys"
 
-    sample_keys --num 6 \
+    sample-keys --num 6 \
         --seed "${MNEMONIC_KEYS_SEED}" \
         --output-dir ./mnemonic_keys
 fi
@@ -74,7 +74,7 @@ then
     echo "-- Generate mnemonic fog keys"
 
     sample-keys --num 6 \
-        --seed "${FOG_KEYS_SEED}" \
+        --seed "${MNEMONIC_FOG_KEYS_SEED}" \
         --fog-report-url "${FOG_REPORT_URL}" \
         --fog-authority-root "${FOG_REPORT_SIGNING_CA_CERT_PATH}" \
         --output-dir ./mnemonic_fog_keys

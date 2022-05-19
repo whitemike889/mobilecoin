@@ -157,6 +157,7 @@ jobs:
           /util/generate_origin_data.sh
 
   fog-distribution:
+    name: fog-distribution ${{ inputs.fog_distribution == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - setup-environment
@@ -176,6 +177,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   minting-tx:
+    name: minting-tx ${{ inputs.minting == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - fog-distribution
@@ -202,6 +204,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   minting:
+    name: minting ${{ inputs.minting == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - minting-tx
@@ -231,6 +234,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mobilecoind-json-integration:
+    name: mobilecoind-json-integration ${{ inputs.mobilecoind_json_integration == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - minting
@@ -250,6 +254,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mobilecoind-grpc-integration:
+    name: mobilecoind-grpc-integration ${{ inputs.mobilecoind_grpc_integration == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - mobilecoind-json-integration
@@ -269,6 +274,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mint-auditor:
+    name: mint-auditor ${{ inputs.mint-auditor == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - mobilecoind-grpc-integration
@@ -288,6 +294,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   drain-accounts:
+    name: drain-accounts ${{ inputs.drain_accounts == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - mint-auditor
@@ -307,6 +314,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   fog-test-client-v0:
+    name: fog-test-client-v0 ${{ inputs.fog_test_client_v0 == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - drain-accounts
@@ -336,6 +344,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   fog-test-client-v2:
+    name: fog-test-client-v2 ${{ inputs.fog_test_client_v2 == 'false' && "(skipped)" }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - fog-test-client-v0
