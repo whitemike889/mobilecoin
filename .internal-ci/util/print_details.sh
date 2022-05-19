@@ -97,7 +97,7 @@ docker run -it --rm \
 
 --- Charts ---
 
-# Add mobilcoin public helm repo
+# Add mobilecoin public helm repo
 helm repo add mobilecoin-foundation-public ${CHART_REPO}
 
 # Update repo if you already have it installed

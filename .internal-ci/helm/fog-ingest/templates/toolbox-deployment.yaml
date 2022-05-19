@@ -26,6 +26,10 @@ spec:
         args:
         - /bin/cat
         tty: true
+        envFrom:
+        - secretRef:
+            name: sample-keys-seeds
+            optional: true
         env:
         - name: FOGDB_HOST
           valueFrom:
@@ -61,6 +65,9 @@ spec:
         volumeMounts:
         - name: minting-keys
           mountPath: /minting-keys
+          readOnly: true
+        - name: wallet-keys
+          mountPath: /wallet-keys
           readOnly: true
       {{- if eq .Values.jaegerTracing.enabled true }}
       - name: jaeger-agent
@@ -110,4 +117,8 @@ spec:
       - name: minting-keys
         secret:
           secretName: consensus-minting-secrets
+          optional: true
+      - name: wallet-keys
+        secret:
+          secretName: sample-keys-seeds
           optional: true
