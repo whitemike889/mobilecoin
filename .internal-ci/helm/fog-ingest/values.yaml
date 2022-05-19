@@ -81,6 +81,7 @@ fogIngest:
   initContainers:
   - name: sysctl
     image: ubuntu:20.04
+    imagePullPolicy: Always
     command:
     - sysctl
     - -w
@@ -89,6 +90,22 @@ fogIngest:
       privileged: true
       runAsUser: 0
       runAsNonRoot: False
+  - name: migrate-ledger
+    image: "{{ .Values.fogIngest.image.org | default .Values.image.org }}/{{ .Values.fogIngest.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+    imagePullPolicy: Always
+    command: [ '/bin/bash' ]
+    args:
+    - -c
+    - |
+      set -e
+      if [[ -f "/fog-data/ledger/data.mdb" ]]
+      then
+        cp /fog-data/ledger/data.mdb /fog-data/ledger/data.mdb.bak
+        /usr/bin/mc-ledger-migration --ledger-db /fog-data/ledger
+      fi
+    volumeMounts:
+    - name: fog-data
+      mountPath: /fog-data
 
 ### Toolbox deployment. Used for activating and retiring.
 toolbox:

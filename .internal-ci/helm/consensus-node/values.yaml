@@ -126,7 +126,11 @@ node:
     - -c
     - |
       set -e
-      /usr/bin/mc-ledger-migration --ledger-db /ledger
+      if [[ -f "/ledger/data.mdb" ]]
+      then
+        cp /ledger/data.mdb /ledger/data.mdb.bak
+        /usr/bin/mc-ledger-migration --ledger-db /ledger
+      fi
     volumeMounts:
     - name: ledger-db-dir
       mountPath: /ledger

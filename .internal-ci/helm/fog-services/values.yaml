@@ -28,7 +28,7 @@ fogReport:
     org: ''
     name: fogreport
     pullPolicy: Always
-  
+
   rust:
     backtrace: full
     log: info,rustls=warn,hyper=warn,tokio_reactor=warn,mio=warn,want=warn,reqwest=warn,rusoto_core=error,rusoto_signature=error,h2=error,rocket=warn,<unknown>=warn
@@ -165,6 +165,24 @@ fogLedger:
       resources:
         requests:
           storage: 512Gi
+
+  initContainers:
+  - name: migrate-ledger
+    image: "{{ .Values.fogLedger.image.org | default .Values.image.org }}/{{ .Values.fogLedger.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+    imagePullPolicy: Always
+    command: [ '/bin/bash' ]
+    args:
+    - -c
+    - |
+      set -e
+      if [[ -f "/fog-data/ledger/data.mdb" ]]
+      then
+        cp /fog-data/ledger/data.mdb /fog-data/ledger/data.mdb.bak
+        /usr/bin/mc-ledger-migration --ledger-db /fog-data/ledger
+      fi
+    volumeMounts:
+    - name: fog-data
+      mountPath: /fog-data
 
   ingress:
     grpc:

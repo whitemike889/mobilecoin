@@ -28,7 +28,7 @@ spec:
         - name: ndots
           value: "1"
       initContainers:
-      {{- toYaml .Values.fogIngest.initContainers | nindent 6 }}
+      {{- tpl (toYaml .Values.fogIngest.initContainers) . | nindent 6 }}
       containers:
       - name: fog-ingest
         image: "{{ .Values.fogIngest.image.org | default .Values.image.org }}/{{ .Values.fogIngest.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

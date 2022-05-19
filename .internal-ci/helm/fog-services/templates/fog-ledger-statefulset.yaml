@@ -27,6 +27,8 @@ spec:
         options:
         - name: ndots
           value: "1"
+      initContainers:
+      {{- tpl (toYaml .Values.fogLedger.initContainers) . | nindent 6 }}
       containers:
       - name: fog-ledger
         image: "{{ .Values.fogLedger.image.org | default .Values.image.org }}/{{ .Values.fogLedger.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

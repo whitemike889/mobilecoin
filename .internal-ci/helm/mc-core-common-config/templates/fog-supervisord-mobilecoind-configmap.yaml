@@ -16,7 +16,6 @@ data:
 {{- end }}
       --poll-interval 1
       --quorum-set {{ include "mcCoreCommonConfig.mobilecoindQuorum" . | squote }}
-      --ledger-db-migrate
       --ledger-db /fog-data/ledger
       --watcher-db /fog-data/watcher
 

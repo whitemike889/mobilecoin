@@ -39,6 +39,7 @@ spec:
         - name: mobilecoin-json
           containerPort: 9090
         - name: mint-auditor-grpc
+          containerPort: 7774
         # Hold liveness and readiness until this probe passes.
         startupProbe:
           exec:
