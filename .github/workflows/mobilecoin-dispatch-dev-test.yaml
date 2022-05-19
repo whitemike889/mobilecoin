@@ -76,3 +76,4 @@ jobs:
       RANCHER_URL: ${{ secrets.RANCHER_URL }}
       RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
       FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
+      CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}

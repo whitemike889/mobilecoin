@@ -70,6 +70,9 @@ on:
       FOG_REPORT_SIGNING_CA_CERT:
         description: "Fog Report Signing CA"
         required: true
+      CACHE_BUSTER:
+        description: "string to make cache unique"
+        required: true
 
 jobs:
   list-values:
@@ -99,6 +102,8 @@ jobs:
     # CBB 1.2+ - we can get rid of this after 1.1.3 deprecation. keys will be on toolbox by secret.
     - name: Cache wallet seeds
       uses: ./.github/actions/mobilecoin-cache-seeds
+      with:
+        cache_buster: ${{ secrets.CACHE_BUSTER }}
 
     - name: Generate wallet keys seed
       id: seed
