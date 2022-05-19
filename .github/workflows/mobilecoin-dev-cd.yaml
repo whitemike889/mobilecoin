@@ -422,7 +422,8 @@ jobs:
             "enable_minting_config": "false",
             "ingest_color": "blue",
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-            "version": "${{ needs.generate-metadata.outputs.previous_release }}"
+            "version": "${{ needs.generate-metadata.outputs.previous_release }}",
+            "client_auth_enabled": "false"
           }
 
   previous-release-test:
@@ -483,7 +484,8 @@ jobs:
             "enable_minting_config": "true",
             "ingest_color": "green",
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-            "version": "${{ needs.generate-metadata.outputs.tag }}"
+            "version": "${{ needs.generate-metadata.outputs.tag }}",
+            "client_auth_enabled": "false"
           }
 
   current-release-v0-test:
@@ -526,7 +528,7 @@ jobs:
   #   - generate-metadata
   #   steps:
   #   - name: Update consensus config
-  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v1-update]')"
+  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v2-update]')"
   #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
   #     with:
   #       workflow: mobilecoin-dispatch-dev-update-consensus
@@ -546,11 +548,11 @@ jobs:
   # current-release-v2-test:
   #   runs-on: [self-hosted, Linux, small]
   #   needs:
-  #   - current-release-v1-update
+  #   - current-release-v2-update
   #   - generate-metadata
   #   steps:
   #   - name: Run MobileCoin integration tests
-  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v1-test]')"
+  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v2-test]')"
   #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
   #     with:
   #       workflow: mobilecoin-dispatch-dev-test
