@@ -1,34 +1,20 @@
 #!/bin/bash
 # Copyright (c) 2018-2022 The MobileCoin Foundation
 #
-# Wrapper around the mobilecoind-json integration_test.py to set up environment for testing.
+# Wrapper around mint-auditor integration_test.py to set up environment for testing.
 #
 
 set -e
 
-strategies_dir=/tmp/mobilecoind-json/strategies
-keys_dir="${strategies_dir}/keys"
-
-mkdir -p "${keys_dir}"
-
-for i in {0..6}
-do
-    # shellcheck disable=SC2086
-    cp /tmp/sample_data/keys/*_${i}.* "${keys_dir}"
-done
-
-# This uses some of the same lib py files as mobilecoind tests.
-cp /test/mobilecoind/strategies/* "${strategies_dir}"
-
-pushd "${strategies_dir}" >/dev/null || exit 1
-
-echo "-- Install requirements"
+echo "-- Install python packages"
 echo ""
-pip3 install -r requirements.txt
+pip3 install grpcio grpcio-tools
 
 echo ""
 echo "-- Set up proto files"
 echo ""
+
+pushd /test/mint-auditor || exit 1
 
 python3 -m grpc_tools.protoc \
     -I"/proto/api" \
@@ -55,9 +41,11 @@ python3 -m grpc_tools.protoc \
 echo ""
 echo "-- Run integration_test.py"
 echo ""
-python3 /test/mobilecoin-json/integration_test.py \
-    --key-dir "${keys_dir}" \
-    --mobilecoind-host "mobilecoind-json" \
-    --mobilecoind-port 80
+python3 integration_test.py \
+    --mobilecoind-addr "mobilecoind-grpc:80" \
+    --mint-auditor-addr "mint-auditor:80" \
+    --mint-client-bin /usr/local/bin/mc-consensus-mint-client \
+    --node-url "mc://node1.${NAMESPACE}.development.mobilecoin.com/" \
+    --mint-singing-key /minting-keys/token1-signer.private.pem
 
 popd >/dev/null || exit 1

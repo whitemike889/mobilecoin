@@ -34,8 +34,11 @@ spec:
         imagePullPolicy: Always
         command: [ "/usr/bin/supervisord" ]
         ports:
-        - name: mobilecoind-rpc
+        - name: mobilecoind-grpc
           containerPort: 3229
+        - name: mobilecoin-json
+          containerPort: 9090
+        - name: mint-auditor-grpc
         # Hold liveness and readiness until this probe passes.
         startupProbe:
           exec:
@@ -118,6 +121,8 @@ spec:
         projected:
           sources:
           - configMap:
-              name: {{ include "mobilecoind.fullname" . }}-supervisor-daemon-config
+              name: {{ include "mobilecoind.fullname" . }}-supervisord-daemon
           - configMap:
               name: mobilecoind-supervisord-mobilecoind
+          - configMap:
+              name: {{ include "mobilecoind.fullname" . }}-supervisord-mint-auditor

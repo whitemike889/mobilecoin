@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "mobilecoind.fullname" . }}-supervisor-daemon-config
+  name: {{ include "mobilecoind.fullname" . }}-supervisord-daemon
   labels:
     {{- include "mobilecoind.labels" . | nindent 4 }}
 data:

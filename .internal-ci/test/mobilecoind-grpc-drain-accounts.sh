@@ -1,20 +1,24 @@
 #!/bin/bash
 # Copyright (c) 2018-2022 The MobileCoin Foundation
 #
-# Wrapper around the mobilecoind-json integration_test.py to set up environment for testing.
+# Wrapper around the mobilecoind drain-accounts.py to set up environment for testing.
 #
 
-set -e
-
-strategies_dir=/tmp/mobilecoind-json/strategies
+strategies_dir=/tmp/drain-accounts/strategies
 keys_dir="${strategies_dir}/keys"
+fog_keys_dir="${strategies_dir}/fog_keys"
 
 mkdir -p "${keys_dir}"
+mkdir -p "${fog_keys_dir}"
 
+echo "-- Copy account keys"
+echo ""
 for i in {0..6}
 do
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086 # yes we want globs
     cp /tmp/sample_data/keys/*_${i}.* "${keys_dir}"
+    # shellcheck disable=SC2086 # yes we want globs
+    cp /tmp/sample_data/fog_keys*_${i}.* "${fog_keys_dir}"
 done
 
 # This uses some of the same lib py files as mobilecoind tests.
@@ -55,9 +59,11 @@ python3 -m grpc_tools.protoc \
 echo ""
 echo "-- Run integration_test.py"
 echo ""
-python3 /test/mobilecoin-json/integration_test.py \
+python3 drain-accounts.py \
     --key-dir "${keys_dir}" \
-    --mobilecoind-host "mobilecoind-json" \
-    --mobilecoind-port 80
+    --dest-keys-dir "${fog_keys_dir}" \
+    --mobilecoind-host "mobilecoind-grpc" \
+    --mobilecoind-port 80 \
+    --token-id 1
 
 popd >/dev/null || exit 1

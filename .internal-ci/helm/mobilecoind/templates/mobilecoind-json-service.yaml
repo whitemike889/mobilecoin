@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "mobilecoind.fullname" . }}
+  name: mobilecoind-json
   labels:
     {{- include "mobilecoind.labels" . | nindent 4 }}
 spec:
@@ -11,6 +11,6 @@ spec:
     app: mobilecoind
     {{- include "mobilecoind.selectorLabels" . | nindent 4 }}
   ports:
-    - name: mobilecoind-rpc
-      port: 3229
-      targetPort: mobilecoind-rpc
+  - name: mobilecoind-json
+    port: 80
+    targetPort: mobilecoind-json

@@ -443,7 +443,15 @@ jobs:
         inputs: |
           {
             "ingest_color": "blue",
-            "namespace": "${{ needs.generate-metadata.outputs.namespace }}"
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "fog_distribution": "true",
+            "fog_test_client_v0": "true",
+            "fog_test_client_v2": "false",
+            "mobilecoind_grpc_integration": "true",
+            "mobilecoind_json_integration": "false",
+            "minting": "false",
+            "mint_auditor": "false",
+            "drain_accounts": "false"
           }
 
 ###############################################
@@ -497,7 +505,14 @@ jobs:
           {
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
             "ingest_color": "green",
-            "fog_distribution": "false"
+            "fog_distribution": "false",
+            "fog_test_client_v0": "true",
+            "fog_test_client_v2": "false",
+            "mobilecoind_grpc_integration": "true",
+            "mobilecoind_json_integration": "false",
+            "minting": "false",
+            "mint_auditor": "false",
+            "drain_accounts": "false"
           }
 
 #################################################
@@ -545,7 +560,14 @@ jobs:
   #       display-workflow-run-url-interval: 30s
   #       inputs: |
   #         {
-  #           "fog_distribution": "false",
   #           "ingest_color": "green",
-  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}"
+  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            # "fog_distribution": "false",
+            # "fog_test_client_v0": "false",
+            # "fog_test_client_v2": "true",
+            # "mobilecoind_grpc_integration": "true",
+            # "mobilecoind_json_integration": "true",
+            # "minting": "true",
+            # "mint_auditor": "true",
+            # "drain_accounts": "true"
   #         }

@@ -6,16 +6,22 @@
 
 set -e
 
-mkdir -p /tmp/strategies/keys
+strategies_dir=/tmp/mobilecoind/strategies
+keys_dir="${strategies_dir}/keys"
 
-for i in {0..6}
+mkdir -p "${keys_dir}"
+
+echo "-- Copy account keys"
+echo ""
+for i in {0..4}
 do
-    cp /tmp/sample_data/keys/*_${i}.* /tmp/strategies/keys
+    # shellcheck disable=SC2086
+    cp /tmp/sample_data/keys/*_${i}.* "${keys_dir}"
 done
 
-cp /test/mobilecoind/strategies/* /tmp/strategies
+cp /test/mobilecoind/strategies/* "${strategies_dir}"
 
-pushd /tmp/strategies >/dev/null || exit 1
+pushd "${strategies_dir}" >/dev/null || exit 1
 
 echo "-- Install requirements"
 echo ""
@@ -48,19 +54,12 @@ then
         --python_out=. --grpc_python_out=. "/proto/mobilecoind/mobilecoind_api.proto"
 fi
 
-if [[ -f "/proto/api/" ]]
-then
-python3 -m grpc_tools.protoc \
-    -I"/proto/mint-auditor" \
-    --python_out=. --grpc_python_out=. "/proto/mint-auditor/mint_auditor.proto"
-fi
-
 echo ""
 echo "-- Run test_client.py"
 echo ""
 python3 test_client.py \
-    --key-dir ./keys \
-    --mobilecoind-host "mobilecoind-grpc" \
+    --key-dir "${keys_dir}" \
+    --mobilecoind-host "mobilecoind" \
     --mobilecoind-port 3229
 
 popd >/dev/null || exit 1
