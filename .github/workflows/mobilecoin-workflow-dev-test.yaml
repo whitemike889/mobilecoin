@@ -167,7 +167,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         command: |
-          /test/fog-distribution.sh
+          /test/fog-distribution-test.sh
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   minting-tx:
@@ -228,7 +228,7 @@ jobs:
   mobilecoind-json-integration:
     runs-on: [self-hosted, Linux, small]
     needs:
-    - minting-tx
+    - minting
     steps:
     - name: Test - mobilecoind-json
       if: inputs.mobilecoind_json_integration == 'true'
@@ -260,7 +260,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
         command: |
-          /test/mobilecoind-grpc-integration-test.sh
+          /test/mobilecoind-integration-test.sh
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mint-auditor:
