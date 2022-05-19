@@ -1,6 +1,8 @@
 # Copyright (c) 2018-2022 The MobileCoin Foundation
 #
 # MobileCoin Core projects - Reusable Workflow - Run integration tests in a development namespace.
+#
+# CBB: make tests work if client_auth_token is enabled.
 
 name: mobilecoin-workflow-dev-test
 
@@ -358,4 +360,3 @@ jobs:
             --transfer-amount 20 \
             --fog-view fog-view://fog.${{ inputs.namespace }}.development.mobilecoin.com:443 \
             --fog-ledger fog-ledger://fog.${{ inputs.namespace }}.development.mobilecoin.com:443
-

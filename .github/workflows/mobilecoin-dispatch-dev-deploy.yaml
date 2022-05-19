@@ -39,6 +39,11 @@ on:
         description: "consensus block_version"
         type: string
         required: true
+      client_auth_enabled:
+        description: "additional shared token for client auth"
+        type: boolean
+        required: true
+        default: false
 
 jobs:
   deploy:
@@ -66,3 +71,4 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
+      CLIENT_AUTH_TOKEN: ${{  github.event.inputs.enabled && secrets.DEV_CLIENT_AUTH_TOKEN || '' }}

@@ -12,6 +12,6 @@ spec:
     app: mobilecoind
     {{- include "mobilecoind.selectorLabels" . | nindent 4 }}
   ports:
-  - name: mobilecoind-grpc
+  - name: grpc
     port: 3229
-    targetPort: mobilecoind-grpc
+    targetPort: grpc

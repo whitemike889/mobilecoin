@@ -81,6 +81,9 @@ on:
       IP_INFO_TOKEN:
         description: "ipinfo.io token for authenticated access"
         required: true
+      CLIENT_AUTH_TOKEN:
+        description: "shared token for client auth"
+        required: false
 
 jobs:
   list-values:
@@ -189,6 +192,7 @@ jobs:
         FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
         FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
         IP_INFO_TOKEN: ${{ secrets.IP_INFO_TOKEN }}
+        CLIENT_AUTH_TOKEN: ${{ secrets.CLIENT_AUTH_TOKEN }}
       run: |
         mkdir -p .tmp/values/
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml

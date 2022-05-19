@@ -34,11 +34,11 @@ spec:
         imagePullPolicy: Always
         command: [ "/usr/bin/supervisord" ]
         ports:
-        - name: mobilecoind-grpc
+        - name: grpc
           containerPort: 3229
-        - name: mobilecoin-json
+        - name: json
           containerPort: 9090
-        - name: mint-auditor-grpc
+        - name: auditor-grpc
           containerPort: 7774
         # Hold liveness and readiness until this probe passes.
         startupProbe:

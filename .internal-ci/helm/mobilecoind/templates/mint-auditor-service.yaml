@@ -11,6 +11,6 @@ spec:
     app: mobilecoind
     {{- include "mobilecoind.selectorLabels" . | nindent 4 }}
   ports:
-  - name: mint-auditor-grpc
+  - name: grpc
     port: 80
-    targetPort: mint-auditor-grpc
+    targetPort: auditor-grpc
