@@ -84,6 +84,9 @@ on:
       CLIENT_AUTH_TOKEN:
         description: "shared token for client auth"
         required: false
+      CACHE_BUSTER:
+        description: "string to make cache unique"
+        required: false
 
 jobs:
   list-values:
@@ -127,6 +130,8 @@ jobs:
 
     - name: Cache wallet seeds .tmp/seeds
       uses: ./.github/actions/mobilecoin-cache-seeds
+      with:
+        cache_buster: ${{ secrets.CACHE_BUSTER }}
 
     - name: Generate Wallet Seed
       id: seed

@@ -7,6 +7,9 @@ inputs:
     required: false
     default: |
       .tmp/seeds
+  cache_buster:
+    description: "string to make cache unique"
+    required: false
 
 outputs:
   cache-hit:
@@ -21,4 +24,4 @@ runs:
     uses: actions/cache@v3
     with:
       path: ${{ inputs.path }}
-      key: ${{ github.ref_name }}-seeds
+      key: ${{ inputs.cache_buster }}-${{ github.ref_name }}-seeds
