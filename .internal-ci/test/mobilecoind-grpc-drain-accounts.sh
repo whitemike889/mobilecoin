@@ -62,8 +62,8 @@ echo ""
 python3 drain-accounts.py \
     --key-dir "${keys_dir}" \
     --dest-keys-dir "${fog_keys_dir}" \
-    --mobilecoind-host "mobilecoind-grpc" \
-    --mobilecoind-port 80 \
+    --mobilecoind-host "mobilecoind" \
+    --mobilecoind-port 3229 \
     --token-id 1
 
 popd >/dev/null || exit 1

@@ -58,6 +58,6 @@ echo ""
 python3 /test/mobilecoin-json/integration_test.py \
     --key-dir "${keys_dir}" \
     --mobilecoind-host "mobilecoind-json" \
-    --mobilecoind-port 80
+    --mobilecoind-port 9090
 
 popd >/dev/null || exit 1

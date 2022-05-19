@@ -521,56 +521,56 @@ jobs:
 #################################################
 # Update current consensus to namespace block v1
 #################################################
-  current-release-v2-update:
-    runs-on: [self-hosted, Linux, small]
-    needs:
-    - current-release-v0-test
-    - generate-metadata
-    steps:
-    - name: Update consensus config
-      if: "! contains(github.event.head_commit.message, '[skip current-release-v2-update]')"
-      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-      with:
-        workflow: mobilecoin-dispatch-dev-update-consensus
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 30m
-        wait-for-completion-interval: 30s
-        display-workflow-run-url-interval: 30s
-        inputs: |
-          {
-            "block_version": "2",
-            "chart_repo": "${{ needs.generate-metadata.outputs.chart_repo }}",
-            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-            "version": "${{ needs.generate-metadata.outputs.tag }}"
-          }
+  # current-release-v2-update:
+  #   runs-on: [self-hosted, Linux, small]
+  #   needs:
+  #   - current-release-v0-test
+  #   - generate-metadata
+  #   steps:
+  #   - name: Update consensus config
+  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v2-update]')"
+  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
+  #     with:
+  #       workflow: mobilecoin-dispatch-dev-update-consensus
+  #       token: ${{ secrets.ACTIONS_TOKEN }}
+  #       wait-for-completion: true
+  #       wait-for-completion-timeout: 30m
+  #       wait-for-completion-interval: 30s
+  #       display-workflow-run-url-interval: 30s
+  #       inputs: |
+  #         {
+  #           "block_version": "2",
+  #           "chart_repo": "${{ needs.generate-metadata.outputs.chart_repo }}",
+  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+  #           "version": "${{ needs.generate-metadata.outputs.tag }}"
+  #         }
 
-  current-release-v2-test:
-    runs-on: [self-hosted, Linux, small]
-    needs:
-    - current-release-v2-update
-    - generate-metadata
-    steps:
-    - name: Run MobileCoin integration tests
-      if: "! contains(github.event.head_commit.message, '[skip current-release-v2-test]')"
-      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-      with:
-        workflow: mobilecoin-dispatch-dev-test
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 30m
-        wait-for-completion-interval: 30s
-        display-workflow-run-url-interval: 30s
-        inputs: |
-          {
-            "ingest_color": "green",
-            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-            "fog_distribution": "false",
-            "fog_test_client_v0": "false",
-            "fog_test_client_v2": "true",
-            "mobilecoind_grpc_integration": "true",
-            "mobilecoind_json_integration": "true",
-            "minting": "true",
-            "mint_auditor": "true",
-            "drain_accounts": "true"
-          }
+  # current-release-v2-test:
+  #   runs-on: [self-hosted, Linux, small]
+  #   needs:
+  #   - current-release-v2-update
+  #   - generate-metadata
+  #   steps:
+  #   - name: Run MobileCoin integration tests
+  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v2-test]')"
+  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
+  #     with:
+  #       workflow: mobilecoin-dispatch-dev-test
+  #       token: ${{ secrets.ACTIONS_TOKEN }}
+  #       wait-for-completion: true
+  #       wait-for-completion-timeout: 30m
+  #       wait-for-completion-interval: 30s
+  #       display-workflow-run-url-interval: 30s
+  #       inputs: |
+  #         {
+  #           "ingest_color": "green",
+  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+  #           "fog_distribution": "false",
+  #           "fog_test_client_v0": "false",
+  #           "fog_test_client_v2": "true",
+  #           "mobilecoind_grpc_integration": "true",
+  #           "mobilecoind_json_integration": "true",
+  #           "minting": "true",
+  #           "mint_auditor": "true",
+  #           "drain_accounts": "true"
+  #         }

@@ -42,8 +42,8 @@ echo ""
 echo "-- Run integration_test.py"
 echo ""
 python3 integration_test.py \
-    --mobilecoind-addr "mobilecoind-grpc:80" \
-    --mint-auditor-addr "mint-auditor:80" \
+    --mobilecoind-addr "mobilecoind:3229" \
+    --mint-auditor-addr "mobilecoind-mint-auditor:7774" \
     --mint-client-bin /usr/local/bin/mc-consensus-mint-client \
     --node-url "mc://node1.${NAMESPACE}.development.mobilecoin.com/" \
     --mint-singing-key /minting-keys/token1-signer.private.pem

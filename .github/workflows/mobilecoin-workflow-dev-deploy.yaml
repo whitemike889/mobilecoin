@@ -125,7 +125,7 @@ jobs:
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
 
-    - name: Cache wallet seeds
+    - name: Cache wallet seeds .tmp/seeds
       uses: ./.github/actions/mobilecoin-cache-seeds
 
     - name: Generate Wallet Seed
@@ -133,17 +133,31 @@ jobs:
       run: |
         .internal-ci/util/generate_wallet_seeds.sh
 
-    - name: Create wallet keys seed secrets
+    - name: Write wallet seed values
+      env:
+        FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.FOG_REPORT_SIGNING_CA_CERT }}
+        INITIAL_KEYS_SEED: ${{ steps.seed.outputs.initial_keys_seed }}
+        FOG_KEYS_SEED: ${{ steps.seed.outputs.fog_keys_seed }}
+        MNEMONIC_KEYS_SEED: ${{ steps.seed.outputs.mnemonic_keys_seed }}
+        MNEMONIC_FOG_KEYS_SEED: ${{ steps.seed.outputs.mnemonic_fog_keys_seed }}
+      run: |
+        mkdir -p .tmp/seed_values
+        echo -n "${FOG_REPORT_SIGNING_CA_CERT}" > .tmp/seed_values/FOG_REPORT_SIGNING_CA_CERT
+        echo -n "${INITIAL_KEYS_SEED}" > .tmp/seed_values/INITIAL_KEYS_SEED
+        echo -n "${FOG_KEYS_SEED}" > .tmp/seed_values/FOG_KEYS_SEED
+        echo -n "${MNEMONIC_KEYS_SEED}" > .tmp/seed_values/MNEMONIC_KEYS_SEED
+        echo -n "${MNEMONIC_FOG_KEYS_SEED}" > .tmp/seed_values/MNEMONIC_FOG_KEYS_SEED
+
+    - name: Create wallet key secrets
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
-        action: sample-keys-create-secrets
+        action: secrets-create-from-file
         namespace: ${{ inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
         rancher_url: ${{ secrets.RANCHER_URL }}
         rancher_token: ${{ secrets.RANCHER_TOKEN }}
-        initial_keys_seed: ${{ steps.seed.outputs.initial_keys_seed }}
-        fog_keys_seed: ${{ steps.seed.outputs.fog_keys_seed }}
-        fog_report_signing_ca_cert: ${{ secrets.FOG_REPORT_SIGNING_CA_CERT }}
+        object_name: sample-keys-seeds
+        src: .tmp/seed_values
 
     - name: Create minting keys
       if: inputs.enable_minting_config == 'true'

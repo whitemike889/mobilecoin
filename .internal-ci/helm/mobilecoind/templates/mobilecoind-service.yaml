@@ -1,9 +1,8 @@
 # Copyright (c) 2018-2022 The MobileCoin Foundation
-# Keep this one for backwards compatibility with older tests.
 apiVersion: v1
 kind: Service
 metadata:
-  name: mobilecoind
+  name: {{ include "mobilecoind.fullname" . }}
   labels:
     {{- include "mobilecoind.labels" . | nindent 4 }}
 spec:

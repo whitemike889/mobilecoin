@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mint-auditor
+  name: {{ include "mobilecoind.fullname" . }}-mint-auditor
   labels:
     {{- include "mobilecoind.labels" . | nindent 4 }}
 spec:
@@ -12,5 +12,5 @@ spec:
     {{- include "mobilecoind.selectorLabels" . | nindent 4 }}
   ports:
   - name: grpc
-    port: 80
+    port: 7774
     targetPort: auditor-grpc

@@ -38,10 +38,18 @@ fog.${NAMESPACE}.development.mobilecoin.com
 
 --- mobilecoind ---
 
-# Connect to mobilecoind API with K8s port forwarding
+Connect to mobilecoind API with K8s port forwarding
+
+# mobilecoind grpc
 kubectl -n ${NAMESPACE} port-forward service/mobilecoind 3229:3229
 
-# Then Connect to http://localhost:3229
+# mobilecoind json
+kubectl -n ${NAMESPACE} port-forward service/mobilecoind-json 9090:9090
+
+# mint-auditor server grpc
+kubectl -n ${NAMESPACE} port-forward service/mint-auditor 7774:7774
+
+Then Connect to localhost:<port>
 
 --- mobilecoind config options ---
 
@@ -62,11 +70,14 @@ kubectl -n ${NAMESPACE} port-forward service/mobilecoind 3229:3229
 
 Seeds for wallets are randomly generated for the environment. You can get the seeds from the secret in the deployment and use sample-keys binary to recreate the keys for testing.
 
-# Set Initial Keys Seed from k8s secret.
+# Set Keys Seeds from k8s secret.
 export INITIAL_KEYS_SEED=\$(kubectl -n ${NAMESPACE} get secrets sample-keys-seeds -ojsonpath='{.data.INITIAL_KEYS_SEED}' | base64 -d)
 
-# Set Fog Keys Seed from k8s secret.
 export FOG_KEYS_SEED=\$(kubectl -n ${NAMESPACE} get secrets sample-keys-seeds -ojsonpath='{.data.FOG_KEYS_SEED}' | base64 -d)
+
+export MNEMONIC_KEYS_SEED=\$(kubectl -n ${NAMESPACE} get secrets sample-keys-seeds -ojsonpath='{.data.MNEMONIC_KEYS_SEED}' | base64 -d)
+
+export MNEMONIC_FOG_KEYS_SEED=\$(kubectl -n ${NAMESPACE} get secrets sample-keys-seeds -ojsonpath='{.data.MNEMONIC_FOG_KEYS_SEED}' | base64 -d)
 
 # Copy singing ca cert to file.
 kubectl -n ${NAMESPACE} get secrets sample-keys-seeds -ojsonpath='{.data.FOG_REPORT_SIGNING_CA_CERT}' | base64 -d > /tmp/fog_report_signing_ca_cert.pem
@@ -77,10 +88,12 @@ docker run -it --rm \
   --env FOG_REPORT_SIGNING_CA_CERT="\$(cat fog_report_signing_ca_cert.pem)" \
   --env FOG_KEYS_SEED \
   --env INITIAL_KEYS_SEED \
+  --env MNEMONIC_KEYS_SEED \
+  --env MNEMONIC_FOG_KEYS_SEED \
   --env FOG_REPORT_SIGNING_CA_CERT_PATH=/tmp/fog_report_signing_ca_cert.pem \
   -v /tmp/fog_report_signing_ca_cert.pem:/tmp/fog_report_signing_ca_cert.pem \
   -v /tmp/sample_data:/tmp/sample_data \
-  ${DOCKER_ORG}/bootstrap-tools:${PREVIOUS_RELEASE} /util/generate_origin_data.sh
+  ${DOCKER_ORG}/bootstrap-tools:${VERSION} /util/generate_origin_data.sh
 
 --- Charts ---
 

@@ -95,6 +95,7 @@ node:
           key: INITIAL_KEYS_SEED
           optional: true
     command: [ '/bin/bash' ]
+    # CBB 1.2+ - convert to using MNEMONIC keys
     args:
     - -c
     - |
