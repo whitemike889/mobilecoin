@@ -9,8 +9,8 @@ data:
     [program:mint-auditor]
     command=/usr/bin/mc-mint-auditor
       scan-ledger
-      --ledger-db /mobilecoin/ledger
-      --mint-auditor-db /mobilecoin/mint-auditor
+      --ledger-db /data/ledger
+      --mint-auditor-db /data/mint-auditor
       --listen-uri insecure-mint-auditor://0.0.0.0:7774/
 
     stdout_logfile=/dev/fd/1
