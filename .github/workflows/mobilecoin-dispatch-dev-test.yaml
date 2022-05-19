@@ -51,8 +51,8 @@ on:
         type: boolean
         required: false
         default: true
-      drain_account:
-        description: "Run drain_account.py to move coin from initial keys to fog keys accounts"
+      drain_accounts:
+        description: "Run drain_accounts.py to move coin from initial keys to fog keys accounts"
         type: boolean
         required: false
         default: true
@@ -70,7 +70,7 @@ jobs:
       mobilecoind_json_integration: ${{ github.event.inputs.mobilecoind_json_integration == 'true' && 'true' || 'false' }}
       minting: ${{ github.event.inputs.minting == 'true' && 'true' || 'false' }}
       mint_auditor: ${{ github.event.inputs.mint_auditor == 'true' && 'true' || 'false' }}
-      drain_account: ${{ github.event.inputs.drain_account == 'true' && 'true' || 'false' }}
+      drain_accounts: ${{ github.event.inputs.drain_accounts == 'true' && 'true' || 'false' }}
     secrets:
       RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
       RANCHER_URL: ${{ secrets.RANCHER_URL }}

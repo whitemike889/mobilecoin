@@ -50,8 +50,8 @@ on:
         type: string
         required: false
         default: 'true'
-      drain_account:
-        description: "Run drain_account.py to move coin from initial keys to fog keys accounts"
+      drain_accounts:
+        description: "Run drain_accounts.py to move coin from initial keys to fog keys accounts"
         type: string
         required: false
         default: 'true'
@@ -287,7 +287,7 @@ jobs:
     needs:
     - mint-auditor
     steps:
-    - name: Test - drain_account.py
+    - name: Test - drain_accounts.py
       if: inputs.drain_accounts == 'true'
       uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
