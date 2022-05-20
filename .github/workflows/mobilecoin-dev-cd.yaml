@@ -7,7 +7,7 @@ name: mobilecoin-dev-cd
 env:
   CHART_REPO: https://harbor.mobilecoin.com/chartrepo/mobilecoinfoundation-public
   DOCKER_ORG: jgreat
-  PREVIOUS_RELEASE: v1.1.3-dev-dev-test-1
+  PREVIOUS_RELEASE: v1.1.3-dev-test-1
 
 on:
   push:
