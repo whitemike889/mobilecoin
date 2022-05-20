@@ -71,5 +71,5 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
-      CLIENT_AUTH_TOKEN: ${{  github.event.inputs.enabled && secrets.DEV_CLIENT_AUTH_TOKEN || '' }}
+      CLIENT_AUTH_TOKEN: ${{  github.event.inputs.client_auth_enabled && secrets.DEV_CLIENT_AUTH_TOKEN || '' }}
       CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}

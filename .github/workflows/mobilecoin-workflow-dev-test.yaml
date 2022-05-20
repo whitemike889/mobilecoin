@@ -2,7 +2,34 @@
 #
 # MobileCoin Core projects - Reusable Workflow - Run integration tests in a development namespace.
 #
-# CBB: make tests work if client_auth_token is enabled.
+# All current tests run with tools, scripts and binaries built and embedded within the toolbox
+# (bootstrap-tools) image. The toolbox image is built and versioned with the app code, so it will only
+# have the tools available at its build time.  This allows tests to be internally consistent with the
+# release you added the test in.
+#
+# To add tests:
+#   - Make sure binaries/scripts are included as part of the toolbox.
+#      (.internal-ci/docker/Dockerfile.bootstrap-tools)
+#   - Simple commands or standalone binaries can use the mobilecoinofficial/gha-k8s-toolbox
+#      toolbox-exec GitHub Action.
+#   - Python tests and multipart scripts should include a wrapper script that installs/refreshes
+#      any requirements and build protos as required. See .internal-ci/test
+#   - Secrets should be generated at Deploy time (mobilecoin-workflow-dev-deploy) and placed in a
+#      k8s secret or configmap object that is then configured as a env or volume on the toolbox deployment.
+#       .internal-ci/helm/fog-ingest/templates/toolbox-deployment.yaml
+#       CBB: move testing tool box into its own chart.
+#   - Make tests optional by adding a variable in the inputs and add variable to
+#       mobilecoin-dispatch-dev-test so dispatch workflows can use it.
+#
+# When adding tests remember:
+#   - Tests are baked into the version they were added in. This is so they will be internally consistent
+#      with the binaries and configurations they were intended to test.
+#   - Any tests/tools/configs/secrets you add now will not be available to the "Previous Release"
+#      toolbox container.
+#   - All tests run with in the kubernetes namespace context so we can reach internally hosted endpoints,
+#      like mobilecoind. (CBB: add full-service?)
+#
+# CBB: make tests work if client_auth_token is enabled. Will require generating the auth tokens.
 
 name: mobilecoin-workflow-dev-test
 
@@ -162,7 +189,7 @@ jobs:
           /util/generate_origin_data.sh
 
   fog-distribution:
-    name: fog-distribution ${{ inputs.fog_distribution == 'false' && '(skipped)' }}
+    name: fog-distribution ${{ inputs.fog_distribution == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - setup-environment
@@ -182,7 +209,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   minting-tx:
-    name: minting-tx ${{ inputs.minting == 'false' && '(skipped)' }}
+    name: minting-tx ${{ inputs.minting == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - fog-distribution
@@ -209,7 +236,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   minting:
-    name: minting ${{ inputs.minting == 'false' && '(skipped)' }}
+    name: minting ${{ inputs.minting == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - minting-tx
@@ -239,7 +266,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mobilecoind-json-integration:
-    name: mobilecoind-json-integration ${{ inputs.mobilecoind_json_integration == 'false' && '(skipped)' }}
+    name: mobilecoind-json-integration ${{ inputs.mobilecoind_json_integration == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - minting
@@ -259,7 +286,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mobilecoind-grpc-integration:
-    name: mobilecoind-grpc-integration ${{ inputs.mobilecoind_grpc_integration == 'false' && '(skipped)' }}
+    name: mobilecoind-grpc-integration ${{ inputs.mobilecoind_grpc_integration == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - mobilecoind-json-integration
@@ -279,7 +306,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   mint-auditor:
-    name: mint-auditor ${{ inputs.mint_auditor == 'false' && '(skipped)' }}
+    name: mint-auditor ${{ inputs.mint_auditor == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - mobilecoind-grpc-integration
@@ -299,7 +326,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   drain-accounts:
-    name: drain-accounts ${{ inputs.drain_accounts == 'false' && '(skipped)' }}
+    name: drain-accounts ${{ inputs.drain_accounts == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - mint-auditor
@@ -319,7 +346,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   fog-test-client-v0:
-    name: fog-test-client-v0 ${{ inputs.fog_test_client_v0 == 'false' && '(skipped)' }}
+    name: fog-test-client-v0 ${{ inputs.fog_test_client_v0 == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - drain-accounts
@@ -349,7 +376,7 @@ jobs:
 
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   fog-test-client-v2:
-    name: fog-test-client-v2 ${{ inputs.fog_test_client_v2 == 'false' && '(skipped)' }}
+    name: fog-test-client-v2 ${{ inputs.fog_test_client_v2 == 'true' && '(run)' || '(skipped)' }}
     runs-on: [self-hosted, Linux, small]
     needs:
     - fog-test-client-v0
