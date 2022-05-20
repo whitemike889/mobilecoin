@@ -39,4 +39,3 @@ ARG GRPC_HEALTH_UTILITY_URL=https://github.com/grpc-ecosystem/grpc-health-probe/
 
 RUN  curl --retry 5 -fL ${GRPC_HEALTH_UTILITY_URL} -o /usr/local/bin/grpc_health_probe \
   && chmod +x /usr/local/bin/grpc_health_probe
-

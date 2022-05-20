@@ -9,23 +9,31 @@
 #
 # To add tests:
 #   - Make sure binaries/scripts are included as part of the toolbox.
-#      (.internal-ci/docker/Dockerfile.bootstrap-tools)
+#       Dockerfile: .internal-ci/docker/Dockerfile.bootstrap-tools
+#       All files saved under .internal-ci/util and .internal-ci/test are already included in the
+#       toolbox image
+#
 #   - Simple commands or standalone binaries can use the mobilecoinofficial/gha-k8s-toolbox
 #      toolbox-exec GitHub Action.
+#
 #   - Python tests and multipart scripts should include a wrapper script that installs/refreshes
 #      any requirements and build protos as required. See .internal-ci/test
+#
 #   - Secrets should be generated at Deploy time (mobilecoin-workflow-dev-deploy) and placed in a
 #      k8s secret or configmap object that is then configured as a env or volume on the toolbox deployment.
 #       .internal-ci/helm/fog-ingest/templates/toolbox-deployment.yaml
-#       CBB: move testing tool box into its own chart.
+#     CBB: move testing tool box into its own chart.
+#
 #   - Make tests optional by adding a variable in the inputs and add variable to
 #       mobilecoin-dispatch-dev-test so dispatch workflows can use it.
 #
 # When adding tests remember:
 #   - Tests are baked into the version they were added in. This is so they will be internally consistent
 #      with the binaries and configurations they were intended to test.
+#
 #   - Any tests/tools/configs/secrets you add now will not be available to the "Previous Release"
 #      toolbox container.
+#
 #   - All tests run with in the kubernetes namespace context so we can reach internally hosted endpoints,
 #      like mobilecoind. (CBB: add full-service?)
 #
@@ -169,6 +177,7 @@ jobs:
 
     # CBB 1.2+ - will not need to define all these variables, they will be populated by secret.
     # update FOG_REPORT_SIGNING_CA_CERT_PATH to point to "/wallet-keys/FOG_REPORT_SIGNING_CA_CERT"
+
     # CBB - Make these things secrets in the target namespace and optional volumes on toolbox.
     # Populates ledger and keys in toolbox at /tmp/sample_data
     - name: Recreate Keys for Testing
