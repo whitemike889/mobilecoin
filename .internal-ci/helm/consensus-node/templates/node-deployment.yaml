@@ -116,12 +116,6 @@ spec:
             configMapKeyRef:
               name: mobilecoin-network
               key: network
-        - name: CLIENT_AUTH_TOKEN_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: client-auth-token
-              key: token
-              optional: true
         - name: BLOCK_VERSION
           valueFrom:
             configMapKeyRef:

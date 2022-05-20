@@ -85,36 +85,11 @@ lookup name from configmap if we have created the objects in consensus-node-conf
   {{- end }}
 {{- end }}
 
-{{- define "consensusNode.minimumFee" -}}
-  {{- if eq .Values.consensusNodeConfig.enabled false }}
-    {{- (lookup "v1" "ConfigMap" .Release.Namespace (include "consensusNode.nodeConfig.configMap.name" .)).data.minimumFee | default "" }}
-  {{- else }}
-    {{- tpl .Values.global.node.nodeConfig.minimumFee . }}
-  {{- end }}
-{{- end }}
-
-{{- define "consensusNode.allowAnyFee" -}}
-  {{- if eq .Values.consensusNodeConfig.enabled false }}
-    {{- (lookup "v1" "ConfigMap" .Release.Namespace (include "consensusNode.nodeConfig.configMap.name" .)).data.allowAnyFee | default "false" }}
-  {{- else }}
-    {{- tpl .Values.global.node.nodeConfig.minimumFee . }}
-  {{- end }}
-{{- end }}
-
 {{- define "consensusNode.blockVersion" -}}
   {{- if eq .Values.consensusNodeConfig.enabled false }}
     {{- (lookup "v1" "ConfigMap" .Release.Namespace (include "consensusNode.nodeConfig.configMap.name" .)).data.blockVersion | default "false" }}
   {{- else }}
     {{- tpl .Values.global.node.nodeConfig.blockVersion . }}
-  {{- end }}
-{{- end }}
-
-{{/* Global values */}}
-{{- define "consensusNode.clientAuth" -}}
-  {{- if eq .Values.mcCoreCommonConfig.enabled false }}
-    {{- (lookup "v1" "Secret" .Release.Namespace "client-auth-token").data.token | default "" | b64dec }}
-  {{- else }}
-    {{- .Values.mcCoreCommonConfig.clientAuth.token | default ""}}
   {{- end }}
 {{- end }}
 

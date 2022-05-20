@@ -148,6 +148,7 @@ jobs:
       run: |
         mkdir -p .tmp/seed_values
         echo -n "${FOG_REPORT_SIGNING_CA_CERT}" > .tmp/seed_values/FOG_REPORT_SIGNING_CA_CERT
+        echo -n "/wallet-seeds/FOG_REPORT_SIGNING_CA_CERT" > .tmp/seed_values/FOG_REPORT_SIGNING_CA_CERT_PATH
         echo -n "${INITIAL_KEYS_SEED}" > .tmp/seed_values/INITIAL_KEYS_SEED
         echo -n "${FOG_KEYS_SEED}" > .tmp/seed_values/FOG_KEYS_SEED
         echo -n "${MNEMONIC_KEYS_SEED}" > .tmp/seed_values/MNEMONIC_KEYS_SEED
