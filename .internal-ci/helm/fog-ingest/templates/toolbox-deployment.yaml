@@ -66,8 +66,8 @@ spec:
         - name: minting-keys
           mountPath: /minting-keys
           readOnly: true
-        - name: wallet-keys
-          mountPath: /wallet-keys
+        - name: wallet-seeds
+          mountPath: /wallet-seeds
           readOnly: true
       {{- if eq .Values.jaegerTracing.enabled true }}
       - name: jaeger-agent
@@ -118,7 +118,7 @@ spec:
         secret:
           secretName: consensus-minting-secrets
           optional: true
-      - name: wallet-keys
+      - name: wallet-seeds
         secret:
           secretName: sample-keys-seeds
           optional: true

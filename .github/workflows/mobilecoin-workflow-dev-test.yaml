@@ -58,12 +58,12 @@ on:
         required: false
         default: 'true'
       fog_test_client_v0:
-        description: "Run fog-test-client test"
+        description: "Run fog-test-client v0 test"
         type: string
         required: false
         default: 'true'
       fog_test_client_v2:
-        description: "Run fog-test-client test"
+        description: "Run fog-test-client v2 test"
         type: string
         required: false
         default: 'true'
