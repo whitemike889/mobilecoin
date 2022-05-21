@@ -25,7 +25,7 @@ on:
         type: string
         required: true
         default: docker.io/mobilecoin
-      enable_minting_config:
+      minting_config_enabled:
         description: "Enable minting config"
         type: boolean
         required: true
@@ -49,7 +49,7 @@ jobs:
       version: ${{ github.event.inputs.version }}
       docker_image_org: ${{ github.event.inputs.docker_image_org }}
       chart_repo: ${{ github.event.inputs.chart_repo }}
-      enable_minting_config: ${{ github.event.inputs.enable_minting_config }}
+      minting_config_enabled: ${{ github.event.inputs.minting_config_enabled }}
       block_version: "${{ github.event.inputs.block_version }}"
     secrets:
       RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}

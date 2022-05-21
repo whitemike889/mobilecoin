@@ -25,7 +25,7 @@ on:
         type: string
         required: true
         default: https://harbor.mobilecoin.com/chartrepo/mobilecoinfoundation-public
-      enable_minting_config:
+      minting_config_enabled:
         description: "Enable minting config"
         type: string
         required: true
@@ -86,14 +86,14 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Create minting keys
-      if: inputs.enable_minting_config == 'true'
+      if: inputs.minting_config_enabled == 'true'
       env:
         MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.MINTING_TRUST_ROOT_PRIVATE }}
       run: |
         .internal-ci/util/generate_minting_keys.sh
 
     - name: Login to DockerHub
-      if: inputs.enable_minting_config == 'true'
+      if: inputs.minting_config_enabled == 'true'
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -101,7 +101,7 @@ jobs:
 
     # CBB: create a minimal image with just mc-consensus-mint-client binary.
     - name: Generate and sign tokens config
-      if: inputs.enable_minting_config == 'true'
+      if: inputs.minting_config_enabled == 'true'
       id: tokens_config
       run: |
         docker run \
@@ -112,7 +112,7 @@ jobs:
           .internal-ci/util/generate_tokens_config.sh
 
     # - name: Create minting key secrets
-    #   if: inputs.enable_minting_config == 'true'
+    #   if: inputs.minting_config_enabled == 'true'
     #   uses: mobilecoinofficial/gha-k8s-toolbox@v1
     #   with:
     #     action: secrets-create-from-file
