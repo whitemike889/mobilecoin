@@ -146,7 +146,7 @@ jobs:
         chart_version: ${{ inputs.version }}
         chart_values: .tmp/values/mc-core-dev-env-values.yaml
         chart_set: |
-          --set=global.node.nodeConfig.blockVersion='${{ inputs.block_version }}'
+          --set=global.node.nodeConfig.blockVersion=${{ inputs.block_version }}
         release_name: mc-core-dev-env-setup
         namespace: ${{ inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}

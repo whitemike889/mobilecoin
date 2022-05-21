@@ -23,7 +23,7 @@ global:
     ### Node configuration settings
     nodeConfig:
       ### Block version - set to upgrade block version.
-      blockVersion: '0'
+      blockVersion: 0
 
     ### Ledger distribution settings. The default for awsPath is auto-generated based on
     #   this values, but can be overridden.

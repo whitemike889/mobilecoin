@@ -226,7 +226,7 @@ jobs:
         chart_version: ${{ inputs.version }}
         chart_values: .tmp/values/mc-core-dev-env-values.yaml
         chart_set: |
-          --set=global.node.nodeConfig.blockVersion='${{ inputs.block_version }}'
+          --set=global.node.nodeConfig.blockVersion=${{ inputs.block_version }}
         release_name: mc-core-dev-env-setup
         namespace: ${{ inputs.namespace }}
         rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
@@ -341,7 +341,7 @@ jobs:
           fog-sql-recovery-db-migrations
 
     - name: Activate primary ingest
-      uses: mobilecoinofficial/gha-k8s-toolbox@4c6a6129f7c4eb2cf0f1ff4613e5b6c0f761bb64
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
       with:
         action: fog-ingest-activate
         ingest_color: ${{ inputs.ingest_color }}
