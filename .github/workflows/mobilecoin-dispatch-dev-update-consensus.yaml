@@ -15,24 +15,42 @@ on:
         description: "Chart Version"
         type: string
         required: true
-      block_version:
-        description: "Block Version"
-        type: string
-        required: true
-        default: '0'
       chart_repo:
         description: "Chart Repo URL"
         type: string
         required: true
         default: https://harbor.mobilecoin.com/chartrepo/mobilecoinfoundation-public
+      docker_image_org:
+        description: "Docker Image Org"
+        type: string
+        required: true
+        default: docker.io/mobilecoin
+      enable_minting_config:
+        description: "Enable minting config"
+        type: boolean
+        required: true
+        default: true
+      block_version:
+        description: "Block Version"
+        type: string
+        required: true
+        default: '2'
+      client_auth_enabled:
+        description: "additional shared token for client auth"
+        type: boolean
+        required: true
+        default: false
+
 jobs:
   update-consensus-block-version:
     uses: ./.github/workflows/mobilecoin-workflow-dev-update-consensus.yaml
     with:
       namespace: ${{ github.event.inputs.namespace }}
-      block_version: "${{ github.event.inputs.block_version }}"
       version: ${{ github.event.inputs.version }}
+      docker_image_org: ${{ github.event.inputs.docker_image_org }}
       chart_repo: ${{ github.event.inputs.chart_repo }}
+      enable_minting_config: ${{ github.event.inputs.enable_minting_config }}
+      block_version: "${{ github.event.inputs.block_version }}"
     secrets:
       RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
       RANCHER_URL: ${{ secrets.RANCHER_URL }}
@@ -43,3 +61,8 @@ jobs:
       IAS_SPID: ${{ secrets.DEV_IAS_SPID }}
       FOG_REPORT_SIGNING_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT }}
       FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT_KEY }}
+      MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.DEV_MINTING_TRUST_ROOT_PRIVATE }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
+      CLIENT_AUTH_TOKEN: ${{  github.event.inputs.client_auth_enabled == 'true' && secrets.DEV_CLIENT_AUTH_TOKEN || '' }}

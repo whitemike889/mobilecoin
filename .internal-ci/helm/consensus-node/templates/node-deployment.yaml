@@ -116,7 +116,7 @@ spec:
             configMapKeyRef:
               name: mobilecoin-network
               key: network
-        - name: BLOCK_VERSION
+        - name: MC_BLOCK_VERSION
           valueFrom:
             configMapKeyRef:
               name: {{ include "consensusNode.nodeConfig.configMap.name" . }}

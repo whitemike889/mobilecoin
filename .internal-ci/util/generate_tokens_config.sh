@@ -42,4 +42,4 @@ echo "$json" | jq . > .tmp/tokens.json
 echo "Signing tokens file"
 mc-consensus-mint-client sign-governors --tokens "${BASE_PATH}/tokens.json" \
     --signing-key "${minting_path}/minting_trust_root.private.pem" \
-    --output-json "${BASE_PATH}/tokens.signed.json"  >/dev/null 2>&1
+    --output-json "${BASE_PATH}/tokens.signed.json"  >/dev/null

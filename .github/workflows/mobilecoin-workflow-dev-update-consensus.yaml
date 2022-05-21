@@ -11,19 +11,29 @@ on:
         description: "Target Namespace"
         type: string
         required: true
-      block_version:
-        description: "block_version"
-        type: string
-        required: true
       version:
         description: "release version"
         type: string
         required: true
+      docker_image_org:
+        description: "Docker Image Org"
+        type: string
+        required: true
+        default: docker.io/mobilecoin
       chart_repo:
         description: "Chart Repo URL"
         type: string
         required: true
         default: https://harbor.mobilecoin.com/chartrepo/mobilecoinfoundation-public
+      enable_minting_config:
+        description: "Enable minting config"
+        type: string
+        required: true
+      block_version:
+        description: "block_version"
+        type: string
+        required: true
+
     secrets:
       RANCHER_CLUSTER:
         description: "Rancher cluster name"
@@ -52,6 +62,21 @@ on:
       FOG_REPORT_SIGNING_CERT_KEY:
         description: "Fog Report signing cert key"
         required: true
+      MINTING_TRUST_ROOT_PRIVATE:
+        description: "Root private key for singing the tokens config"
+        required: false
+      DOCKERHUB_TOKEN:
+        description: "Docker hub creds"
+        required: false
+      DOCKERHUB_USERNAME:
+        description: "Docker hub creds"
+        required: false
+      IP_INFO_TOKEN:
+        description: "ipinfo.io token for authenticated access"
+        required: true
+      CLIENT_AUTH_TOKEN:
+        description: "shared token for client auth"
+        required: false
 
 jobs:
   setup-environment:
@@ -59,6 +84,44 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+
+    - name: Create minting keys
+      if: inputs.enable_minting_config == 'true'
+      env:
+        MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.MINTING_TRUST_ROOT_PRIVATE }}
+      run: |
+        .internal-ci/util/generate_minting_keys.sh
+
+    - name: Login to DockerHub
+      if: inputs.enable_minting_config == 'true'
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # CBB: create a minimal image with just mc-consensus-mint-client binary.
+    - name: Generate and sign tokens config
+      if: inputs.enable_minting_config == 'true'
+      id: tokens_config
+      run: |
+        docker run \
+          -v ${{ github.workspace }}:/workspace \
+          --network none \
+          --workdir /workspace \
+          ${{ inputs.docker_image_org }}/bootstrap-tools:${{ inputs.version }} \
+          .internal-ci/util/generate_tokens_config.sh
+
+    # - name: Create minting key secrets
+    #   if: inputs.enable_minting_config == 'true'
+    #   uses: mobilecoinofficial/gha-k8s-toolbox@v1
+    #   with:
+    #     action: secrets-create-from-file
+    #     namespace: ${{ inputs.namespace }}
+    #     rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+    #     rancher_url: ${{ secrets.RANCHER_URL }}
+    #     rancher_token: ${{ secrets.RANCHER_TOKEN }}
+    #     object_name: consensus-minting-secrets
+    #     src: .tmp/seeds/minting
 
     - name: Generate environment values file
       env:
@@ -68,7 +131,8 @@ jobs:
         LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEDGER_AWS_SECRET_ACCESS_KEY }}
         FOG_REPORT_SIGNING_CERT: ${{ secrets.FOG_REPORT_SIGNING_CERT }}
         FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.FOG_REPORT_SIGNING_CERT_KEY }}
-        # CLIENT_AUTH_TOKEN:
+        IP_INFO_TOKEN: ${{ secrets.IP_INFO_TOKEN }}
+        CLIENT_AUTH_TOKEN: ${{ secrets.CLIENT_AUTH_TOKEN }}
       run: |
         mkdir -p .tmp/values/
         .internal-ci/util/generate_dev_values.sh > .tmp/values/mc-core-dev-env-values.yaml
