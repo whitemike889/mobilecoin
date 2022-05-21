@@ -8,8 +8,11 @@
 set -e
 set -x
 
+echo "no foot-guns, check the tag vars and remove this exit 0 to use!"
+exit 0
+
 source_org=mobilecoin
-source_tag=v1.1.3-dev
+source_tag=demo-v20220307170316
 
 push_org=mobilecoin
 push_tag=v1.1.3-dev
@@ -21,6 +24,7 @@ charts=(consensus-node consensus-node-config fog-ingest fog-ingest-config fog-se
 for i in "${images[@]}"
 do
     docker rm "${i}" || true
+    docker pull "${source_org}/${i}:${source_tag}"
     docker create --name "${i}" "${source_org}/${i}:${source_tag}"
 done
 
@@ -31,8 +35,8 @@ docker cp "bootstrap-tools:/usr/local/bin/generate-sample-ledger" ./
 docker cp "bootstrap-tools:/usr/local/bin/sample-keys" ./
 docker cp "bootstrap-tools:/usr/local/bin/fog-distribution" ./
 docker cp "bootstrap-tools:/usr/local/bin/fog_ingest_client" ./
-docker cp "bootstrap-tools:/usr/local/bin/mc-consensus-mint-client" ./
-docker cp "bootstrap-tools:/usr/local/bin/mc-util-seeded-ed25519-key-gen" ./
+# docker cp "bootstrap-tools:/usr/local/bin/mc-consensus-mint-client" ./
+# docker cp "bootstrap-tools:/usr/local/bin/mc-util-seeded-ed25519-key-gen" ./
 docker cp "fog-ledger:/usr/bin/libledger-enclave.signed.so" ./
 docker cp "fog-ledger:/usr/bin/ledger_server" ./
 docker cp "fog-ledger:/usr/bin/mobilecoind" ./

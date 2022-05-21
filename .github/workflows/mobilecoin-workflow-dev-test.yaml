@@ -376,6 +376,20 @@ jobs:
             --fog-view fog-view://fog.${{ inputs.namespace }}.development.mobilecoin.com:443 \
             --fog-ledger fog-ledger://fog.${{ inputs.namespace }}.development.mobilecoin.com:443
 
+
+# test_client \
+# --key-dir /tmp/sample_data/fog_keys \
+# --consensus mc://node1.${NAMESPACE}.development.mobilecoin.com/ \
+# --consensus mc://node2.${NAMESPACE}.development.mobilecoin.com/ \
+# --consensus mc://node3.${NAMESPACE}.development.mobilecoin.com/ \
+# --num-clients 6 \
+# --num-transactions 32 \
+# --consensus-wait 300 \
+# --transfer-amount 20 \
+# --fog-view fog-view://fog.${NAMESPACE}.development.mobilecoin.com:443 \
+# --fog-ledger fog-ledger://fog.${NAMESPACE}.development.mobilecoin.com:443
+
+
   # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   fog-test-client-v2:
     name: fog-test-client-v2 ${{ inputs.fog_test_client_v2 == 'true' && '(run)' || '(skipped)' }}

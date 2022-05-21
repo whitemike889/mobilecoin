@@ -115,6 +115,7 @@ jobs:
           -p mc-fog-ingest-server \
           -p mc-fog-ingest-client \
           -p mc-fog-ledger-server \
+          -p mc-fog-report-cli /
           -p mc-fog-report-server \
           -p mc-fog-sql-recovery-db \
           -p mc-fog-test-client \
