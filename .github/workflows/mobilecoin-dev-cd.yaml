@@ -376,25 +376,25 @@ jobs:
 #################################
 # Reset existing namespace
 #################################
-  # dev-reset:
-  #   runs-on: [self-hosted, Linux, small]
-  #   needs:
-  #   - generate-metadata
-  #   steps:
-  #   - name: Reset development namespace
-  #     if: "! contains(github.event.head_commit.message, '[skip dev-reset]')"
-  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-  #     with:
-  #       workflow: mobilecoin-dispatch-dev-reset
-  #       token: ${{ secrets.ACTIONS_TOKEN }}
-  #       wait-for-completion: true
-  #       wait-for-completion-timeout: 30m
-  #       wait-for-completion-interval: 30s
-  #       display-workflow-run-url-interval: 30s
-  #       inputs: |
-  #         {
-  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}"
-  #         }
+  dev-reset:
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    - generate-metadata
+    steps:
+    - name: Reset development namespace
+      if: "! contains(github.event.head_commit.message, '[skip dev-reset]')"
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
+      with:
+        workflow: mobilecoin-dispatch-dev-reset
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}"
+          }
 
 #######################################
 # Deploy previous release to namespace
@@ -464,6 +464,7 @@ jobs:
     runs-on: [self-hosted, Linux, small]
     needs:
     # - previous-release-test
+    - dev-reset
     - generate-metadata
     - charts
     steps:
