@@ -399,33 +399,64 @@ jobs:
 #######################################
 # Deploy previous release to namespace
 #######################################
-  # previous-release-deploy:
-  #   runs-on: [self-hosted, Linux, small]
-  #   needs:
-  #   - dev-reset
-  #   - generate-metadata
-  #   steps:
-  #   - name: Deploy Release
-  #     if: "! contains(github.event.head_commit.message, '[skip previous-release-deploy]')"
-  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-  #     with:
-  #       workflow: mobilecoin-dispatch-dev-deploy
-  #       token: ${{ secrets.ACTIONS_TOKEN }}
-  #       wait-for-completion: true
-  #       wait-for-completion-timeout: 30m
-  #       wait-for-completion-interval: 30s
-  #       display-workflow-run-url-interval: 30s
-  #       inputs: |
-  #         {
-  #           "block_version": "0",
-  #           "chart_repo": "${{ needs.generate-metadata.outputs.chart_repo }}",
-  #           "docker_image_org": "${{ needs.generate-metadata.outputs.docker_org }}",
-  #           "minting_config_enabled": "false",
-  #           "ingest_color": "blue",
-  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-  #           "version": "${{ needs.generate-metadata.outputs.previous_release }}",
-  #           "client_auth_enabled": "false"
-  #         }
+  previous-release-deploy:
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    - dev-reset
+    - generate-metadata
+    steps:
+    - name: Deploy Release
+      if: "! contains(github.event.head_commit.message, '[skip previous-release-deploy]')"
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
+      with:
+        workflow: mobilecoin-dispatch-dev-deploy
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "block_version": "0",
+            "chart_repo": "${{ needs.generate-metadata.outputs.chart_repo }}",
+            "docker_image_org": "${{ needs.generate-metadata.outputs.docker_org }}",
+            "minting_config_enabled": "false",
+            "ingest_color": "blue",
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "version": "${{ needs.generate-metadata.outputs.previous_release }}",
+            "client_auth_enabled": "false"
+          }
+
+  previous-release-test:
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    - previous-release-deploy
+    - generate-metadata
+    steps:
+    - name: Run MobileCoin integration tests
+      if: "! contains(github.event.head_commit.message, '[skip previous-release-test]')"
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
+      with:
+        workflow: mobilecoin-dispatch-dev-test
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "ingest_color": "blue",
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "fog_distribution": "true",
+            "fog_test_client_v0": "false",
+            "fog_test_client_v2": "false",
+            "mobilecoind_grpc_integration": "false",
+            "mobilecoind_json_integration": "false",
+            "minting": "false",
+            "mint_auditor": "false",
+            "drain_accounts": "false"
+          }
+
 
   # previous-release-test:
   #   runs-on: [self-hosted, Linux, small]
@@ -463,8 +494,7 @@ jobs:
   current-release-v0-deploy:
     runs-on: [self-hosted, Linux, small]
     needs:
-    # - previous-release-test
-    - dev-reset
+    - previous-release-test
     - generate-metadata
     - charts
     steps:
@@ -488,36 +518,6 @@ jobs:
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
             "version": "${{ needs.generate-metadata.outputs.tag }}",
             "client_auth_enabled": "false"
-          }
-
-  current-release-v0-test:
-    runs-on: [self-hosted, Linux, small]
-    needs:
-    - current-release-v0-deploy
-    - generate-metadata
-    steps:
-    - name: Run MobileCoin integration tests
-      if: "! contains(github.event.head_commit.message, '[skip current-release-v0-test]')"
-      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-      with:
-        workflow: mobilecoin-dispatch-dev-test
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        wait-for-completion: true
-        wait-for-completion-timeout: 30m
-        wait-for-completion-interval: 30s
-        display-workflow-run-url-interval: 30s
-        inputs: |
-          {
-            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-            "ingest_color": "green",
-            "fog_distribution": "true",
-            "fog_test_client_v0": "false",
-            "fog_test_client_v2": "false",
-            "mobilecoind_grpc_integration": "false",
-            "mobilecoind_json_integration": "false",
-            "minting": "false",
-            "mint_auditor": "false",
-            "drain_accounts": "false"
           }
 
   # current-release-v0-test:
