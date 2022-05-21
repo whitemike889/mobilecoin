@@ -341,7 +341,7 @@ jobs:
           fog-sql-recovery-db-migrations
 
     - name: Activate primary ingest
-      uses: mobilecoinofficial/gha-k8s-toolbox@v1
+      uses: mobilecoinofficial/gha-k8s-toolbox@967435e5c0c1ba9f168aeea2b3da9de048177fce
       with:
         action: fog-ingest-activate
         ingest_color: ${{ inputs.ingest_color }}
