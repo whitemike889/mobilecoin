@@ -258,24 +258,25 @@ jobs:
   #         /test/mobilecoind-json-integration-test.sh
 
   # # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
-  # mobilecoind-grpc-integration:
-  #   name: mobilecoind-grpc-integration ${{ inputs.mobilecoind_grpc_integration == 'true' && '(run)' || '(skipped)' }}
-  #   runs-on: [self-hosted, Linux, small]
-  #   needs:
-  #   - mobilecoind-json-integration
-  #   steps:
-  #   - name: Test - mobilecoind-grpc (previously Wallet Integration)
-  #     if: inputs.mobilecoind_grpc_integration == 'true'
-  #     uses: mobilecoinofficial/gha-k8s-toolbox@v1
-  #     with:
-  #       action: toolbox-exec
-  #       ingest_color: ${{ inputs.ingest_color }}
-  #       namespace: ${{ inputs.namespace }}
-  #       rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-  #       rancher_url: ${{ secrets.RANCHER_URL }}
-  #       rancher_token: ${{ secrets.RANCHER_TOKEN }}
-  #       command: |
-  #         /test/mobilecoind-integration-test.sh
+  mobilecoind-grpc-integration:
+    name: mobilecoind-grpc-integration ${{ inputs.mobilecoind_grpc_integration == 'true' && '(run)' || '(skipped)' }}
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    # - mobilecoind-json-integration
+    - fog-distribution
+    steps:
+    - name: Test - mobilecoind-grpc (previously Wallet Integration)
+      if: inputs.mobilecoind_grpc_integration == 'true'
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
+      with:
+        action: toolbox-exec
+        ingest_color: ${{ inputs.ingest_color }}
+        namespace: ${{ inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          /test/mobilecoind-integration-test.sh
 
   # # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
   # mint-auditor:
@@ -318,34 +319,35 @@ jobs:
   #         /test/mobilecoind-grpc-drain-accounts.sh
 
   # # This test requires test files and scripts that are embedded in the bootstrap-tools image - toolbox pod.
-  # fog-test-client-v0:
-  #   name: fog-test-client-v0 ${{ inputs.fog_test_client_v0 == 'true' && '(run)' || '(skipped)' }}
-  #   runs-on: [self-hosted, Linux, small]
-  #   needs:
-  #   - drain-accounts
-  #   steps:
-  #   - name: Test - fog-test-client
-  #     if: inputs.fog_test_client_v0 == 'true'
-  #     uses: mobilecoinofficial/gha-k8s-toolbox@v1
-  #     with:
-  #       action: toolbox-exec
-  #       ingest_color: ${{ inputs.ingest_color }}
-  #       namespace: ${{ inputs.namespace }}
-  #       rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
-  #       rancher_url: ${{ secrets.RANCHER_URL }}
-  #       rancher_token: ${{ secrets.RANCHER_TOKEN }}
-  #       command: |
-  #         test_client \
-  #           --key-dir /tmp/sample_data/fog_keys \
-  #           --consensus mc://node1.${{ inputs.namespace }}.development.mobilecoin.com/ \
-  #           --consensus mc://node2.${{ inputs.namespace }}.development.mobilecoin.com/ \
-  #           --consensus mc://node3.${{ inputs.namespace }}.development.mobilecoin.com/ \
-  #           --num-clients 6 \
-  #           --num-transactions 32 \
-  #           --consensus-wait 300 \
-  #           --transfer-amount 20 \
-  #           --fog-view fog-view://fog.${{ inputs.namespace }}.development.mobilecoin.com:443 \
-  #           --fog-ledger fog-ledger://fog.${{ inputs.namespace }}.development.mobilecoin.com:443
+  fog-test-client-v0:
+    name: fog-test-client-v0 ${{ inputs.fog_test_client_v0 == 'true' && '(run)' || '(skipped)' }}
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    # - drain-accounts
+    - mobilecoind-grpc-integration
+    steps:
+    - name: Test - fog-test-client
+      if: inputs.fog_test_client_v0 == 'true'
+      uses: mobilecoinofficial/gha-k8s-toolbox@v1
+      with:
+        action: toolbox-exec
+        ingest_color: ${{ inputs.ingest_color }}
+        namespace: ${{ inputs.namespace }}
+        rancher_cluster: ${{ secrets.RANCHER_CLUSTER }}
+        rancher_url: ${{ secrets.RANCHER_URL }}
+        rancher_token: ${{ secrets.RANCHER_TOKEN }}
+        command: |
+          test_client \
+            --key-dir /tmp/sample_data/fog_keys \
+            --consensus mc://node1.${{ inputs.namespace }}.development.mobilecoin.com/ \
+            --consensus mc://node2.${{ inputs.namespace }}.development.mobilecoin.com/ \
+            --consensus mc://node3.${{ inputs.namespace }}.development.mobilecoin.com/ \
+            --num-clients 6 \
+            --num-transactions 32 \
+            --consensus-wait 300 \
+            --transfer-amount 20 \
+            --fog-view fog-view://fog.${{ inputs.namespace }}.development.mobilecoin.com:443 \
+            --fog-ledger fog-ledger://fog.${{ inputs.namespace }}.development.mobilecoin.com:443
 
 
 # test_client \

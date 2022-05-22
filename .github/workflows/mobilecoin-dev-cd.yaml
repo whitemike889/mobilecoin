@@ -341,8 +341,6 @@ jobs:
     - docker
     - generate-metadata
     strategy:
-      # Updating the chart index can only be done by one process at a time.
-      # max-parallel: 1
       matrix:
         chart:
         - consensus-node
@@ -448,45 +446,14 @@ jobs:
             "ingest_color": "blue",
             "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
             "fog_distribution": "true",
-            "fog_test_client_v0": "false",
+            "fog_test_client_v0": "true",
             "fog_test_client_v2": "false",
-            "mobilecoind_grpc_integration": "false",
+            "mobilecoind_grpc_integration": "true",
             "mobilecoind_json_integration": "false",
             "minting": "false",
             "mint_auditor": "false",
             "drain_accounts": "false"
           }
-
-
-  # previous-release-test:
-  #   runs-on: [self-hosted, Linux, small]
-  #   needs:
-  #   - previous-release-deploy
-  #   - generate-metadata
-  #   steps:
-  #   - name: Run MobileCoin integration tests
-  #     if: "! contains(github.event.head_commit.message, '[skip previous-release-test]')"
-  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-  #     with:
-  #       workflow: mobilecoin-dispatch-dev-test
-  #       token: ${{ secrets.ACTIONS_TOKEN }}
-  #       wait-for-completion: true
-  #       wait-for-completion-timeout: 30m
-  #       wait-for-completion-interval: 30s
-  #       display-workflow-run-url-interval: 30s
-  #       inputs: |
-  #         {
-  #           "ingest_color": "blue",
-  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-  #           "fog_distribution": "true",
-  #           "fog_test_client_v0": "true",
-  #           "fog_test_client_v2": "false",
-  #           "mobilecoind_grpc_integration": "true",
-  #           "mobilecoind_json_integration": "false",
-  #           "minting": "false",
-  #           "mint_auditor": "false",
-  #           "drain_accounts": "false"
-  #         }
 
 ###############################################
 # Deploy current version to namespace block v0
@@ -520,35 +487,35 @@ jobs:
             "client_auth_enabled": "false"
           }
 
-  # current-release-v0-test:
-  #   runs-on: [self-hosted, Linux, small]
-  #   needs:
-  #   - current-release-v0-deploy
-  #   - generate-metadata
-  #   steps:
-  #   - name: Run MobileCoin integration tests
-  #     if: "! contains(github.event.head_commit.message, '[skip current-release-v0-test]')"
-  #     uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-  #     with:
-  #       workflow: mobilecoin-dispatch-dev-test
-  #       token: ${{ secrets.ACTIONS_TOKEN }}
-  #       wait-for-completion: true
-  #       wait-for-completion-timeout: 30m
-  #       wait-for-completion-interval: 30s
-  #       display-workflow-run-url-interval: 30s
-  #       inputs: |
-  #         {
-  #           "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-  #           "ingest_color": "green",
-  #           "fog_distribution": "false",
-  #           "fog_test_client_v0": "true",
-  #           "fog_test_client_v2": "false",
-  #           "mobilecoind_grpc_integration": "true",
-  #           "mobilecoind_json_integration": "false",
-  #           "minting": "false",
-  #           "mint_auditor": "false",
-  #           "drain_accounts": "false"
-  #         }
+  current-release-v0-test:
+    runs-on: [self-hosted, Linux, small]
+    needs:
+    - current-release-v0-deploy
+    - generate-metadata
+    steps:
+    - name: Run MobileCoin integration tests
+      if: "! contains(github.event.head_commit.message, '[skip current-release-v0-test]')"
+      uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
+      with:
+        workflow: mobilecoin-dispatch-dev-test
+        token: ${{ secrets.ACTIONS_TOKEN }}
+        wait-for-completion: true
+        wait-for-completion-timeout: 30m
+        wait-for-completion-interval: 30s
+        display-workflow-run-url-interval: 30s
+        inputs: |
+          {
+            "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
+            "ingest_color": "green",
+            "fog_distribution": "false",
+            "fog_test_client_v0": "true",
+            "fog_test_client_v2": "false",
+            "mobilecoind_grpc_integration": "true",
+            "mobilecoind_json_integration": "false",
+            "minting": "false",
+            "mint_auditor": "false",
+            "drain_accounts": "false"
+          }
 
 #################################################
 # Update current consensus to namespace block v1
@@ -556,8 +523,8 @@ jobs:
   current-release-v2-update:
     runs-on: [self-hosted, Linux, small]
     needs:
-    # - current-release-v0-test
-    - current-release-v0-deploy
+    - current-release-v0-test
+    # - current-release-v0-deploy
     - generate-metadata
     steps:
     - name: Update consensus config
