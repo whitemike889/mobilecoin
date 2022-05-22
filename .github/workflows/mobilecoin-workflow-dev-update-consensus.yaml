@@ -167,7 +167,7 @@ jobs:
         - deployment.app/consensus-node-5
     steps:
     - name: Restart Consensus Nodes
-      uses: mobilecoinofficial/gha-k8s-toolbox@058c8a3fae801a4a44ce436aaff2bbcd392651d6
+      uses: mobilecoinofficial/gha-k8s-toolbox@07b8e4e2a9310b0ed5b8958808a30e95adbddbe5
       with:
         action: pod-restart
         object_name: ${{ matrix.object_name }}
