@@ -24,6 +24,7 @@ zeroize = { version = "1", default-features = false }
 
 # MobileCoin dependencies
 mc-account-keys = { path = "../../account-keys" }
+mc-attest-verifier-types = { path = "../../attest/verifier/types", default-features = false }
 mc-common = { path = "../../common", default-features = false }
 mc-crypto-box = { path = "../../crypto/box" }
 mc-crypto-digestible = { path = "../../crypto/digestible", features = ["dalek", "derive"] }

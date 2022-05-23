@@ -5,10 +5,15 @@
 
 use maplit::btreemap;
 use mc_account_keys::{AccountKey, PublicAddress, RootIdentity};
-use mc_api::external;
+use mc_api::{blockchain, external, quorum_set};
+use mc_attest_verifier_types::VerificationReport;
+use mc_consensus_scp::test_utils::test_node_id;
+use mc_crypto_keys::Ed25519Pair;
 use mc_crypto_ring_signature_signer::NoKeysRingSigner;
 use mc_fog_report_validation_test_utils::{FullyValidatedFogPubkey, MockFogResolver};
-use mc_transaction_core::{Amount, BlockVersion, SignedContingentInput};
+use mc_transaction_core::{
+    Amount, BlockID, BlockVersion, QuorumSet, SignedBlockMetadata, SignedContingentInput,
+};
 use mc_transaction_std::{
     test_utils::get_input_credentials, EmptyMemoBuilder, ReservedSubaddresses,
     SignedContingentInputBuilder,
@@ -33,6 +38,12 @@ fn round_trip_message<SRC: ProstMessage + Eq + Default, DEST: ProtobufMessage>(p
         mc_util_serial::decode(&protobuf_bytes).expect("Parsing prost from protobuf bytes failed");
 
     assert_eq!(*prost_val, final_val);
+}
+
+fn random_bytes_vec<RNG: RngCore + CryptoRng>(num_bytes: usize, rng: &mut RNG) -> Vec<u8> {
+    let mut result = Vec::with_capacity(num_bytes);
+    rng.fill_bytes(&mut result);
+    result
 }
 
 // Generate some example root identities
@@ -182,5 +193,53 @@ fn signed_contingent_input_round_trip() {
                 );
             }
         }
+    })
+}
+
+fn make_quorum_set<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> QuorumSet {
+    let n = rng.next_u32() % 20 + 3; // n in [3, 22]
+    let threshold = rng.next_u32() % n + 1; // [1, n]
+    let node_ids = (0..n).map(|x| (&test_node_id(x)).into()).collect();
+    QuorumSet::new_with_node_ids(threshold, node_ids)
+}
+
+#[test]
+fn quorum_set_round_trip() {
+    run_with_several_seeds(|mut rng| {
+        round_trip_message::<QuorumSet, quorum_set::QuorumSet>(&make_quorum_set(&mut rng))
+    })
+}
+
+fn make_verification_report<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> VerificationReport {
+    let sig = random_bytes_vec(42, rng).into();
+    let chain_len = rng.next_u32() % 40 + 2; // in [2, 41]
+    let chain = (1..=chain_len)
+        .map(|n| random_bytes_vec(n as usize, rng))
+        .collect();
+    VerificationReport {
+        sig,
+        chain,
+        http_body: "testing".to_owned(),
+    }
+}
+
+fn make_block_metadata<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> SignedBlockMetadata {
+    let signer = Ed25519Pair::from_random(rng);
+    let metadata = mc_transaction_core::BlockMetadata::new(
+        BlockID(FromRandom::from_random(rng)),
+        Some(make_quorum_set(rng)),
+        Some(make_verification_report(rng)),
+    );
+
+    SignedBlockMetadata::from_contents_and_keypair(metadata, &signer)
+        .expect("SignedBlockMetadata::from_contents_and_keypair")
+}
+
+#[test]
+fn block_metadata_round_trip() {
+    run_with_several_seeds(|mut rng| {
+        round_trip_message::<SignedBlockMetadata, blockchain::SignedBlockMetadata>(
+            &make_block_metadata(&mut rng),
+        )
     })
 }

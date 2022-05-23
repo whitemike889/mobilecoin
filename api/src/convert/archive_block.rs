@@ -1,115 +1,102 @@
+// Copyright (c) 2018-2022 The MobileCoin Foundation
+
 //! Convert to/from blockchain::ArchiveBlock
 
-use crate::{blockchain, convert::ConversionError};
-use mc_transaction_core::compute_block_id;
-use protobuf::RepeatedField;
+use crate::{blockchain, ConversionError};
+use mc_transaction_core::{BlockContents, BlockData, BlockMetadata, BlockSignature};
 use std::convert::TryFrom;
 
 /// Convert mc_transaction_core::BlockData --> blockchain::ArchiveBlock.
-impl From<&mc_transaction_core::BlockData> for blockchain::ArchiveBlock {
-    fn from(src: &mc_transaction_core::BlockData) -> Self {
-        let bc_block = blockchain::Block::from(src.block());
-        let bc_block_contents = blockchain::BlockContents::from(src.contents());
-
-        let mut archive_block_v1 = blockchain::ArchiveBlockV1::new();
-        archive_block_v1.set_block(bc_block);
-        archive_block_v1.set_block_contents(bc_block_contents);
+impl From<&BlockData> for blockchain::ArchiveBlock {
+    fn from(src: &BlockData) -> Self {
+        let mut archive_block = blockchain::ArchiveBlock::new();
+        let archive_block_v1 = archive_block.mut_v1();
+        archive_block_v1.set_block(src.block().into());
+        archive_block_v1.set_block_contents(src.contents().into());
 
         if let Some(signature) = src.signature() {
-            let bc_signature = blockchain::BlockSignature::from(signature);
-            archive_block_v1.set_signature(bc_signature);
+            archive_block_v1.set_signature(signature.into());
         }
-
-        let mut archive_block = blockchain::ArchiveBlock::new();
-        archive_block.set_v1(archive_block_v1);
+        if let Some(metadata) = src.metadata() {
+            archive_block_v1.set_metadata(metadata.into());
+        }
 
         archive_block
     }
 }
 
 /// Convert from blockchain::ArchiveBlock --> mc_transaction_core::BlockData
-impl TryFrom<&blockchain::ArchiveBlock> for mc_transaction_core::BlockData {
+impl TryFrom<&blockchain::ArchiveBlock> for BlockData {
     type Error = ConversionError;
 
     fn try_from(src: &blockchain::ArchiveBlock) -> Result<Self, Self::Error> {
         if !src.has_v1() {
             return Err(ConversionError::ObjectMissing);
         }
+        let archive_block_v1 = src.get_v1();
 
-        let block = mc_transaction_core::Block::try_from(src.get_v1().get_block())?;
+        let block = archive_block_v1.get_block().try_into()?;
+        let block_contents = BlockContents::try_from(archive_block_v1.get_block_contents())?;
 
-        let block_contents =
-            mc_transaction_core::BlockContents::try_from(src.get_v1().get_block_contents())?;
-
-        let signature = src
-            .get_v1()
+        let signature = archive_block_v1
             .signature
             .as_ref()
-            .map(mc_transaction_core::BlockSignature::try_from)
+            .map(BlockSignature::try_from)
             .transpose()?;
-
         if let Some(signature) = signature.as_ref() {
             signature
                 .verify(&block)
                 .map_err(|_| ConversionError::InvalidSignature)?;
         }
 
-        if block.contents_hash != block_contents.hash() {
-            return Err(ConversionError::InvalidContents);
-        }
+        let metadata = archive_block_v1
+            .metadata
+            .as_ref()
+            .map(BlockMetadata::try_from)
+            .transpose()?;
 
-        Ok(mc_transaction_core::BlockData::new(
-            block,
-            block_contents,
-            signature,
-        ))
+        if block.contents_hash == block_contents.hash() && block.is_block_id_valid() {
+            Ok(BlockData::new(block, block_contents, signature, metadata))
+        } else {
+            Err(ConversionError::InvalidContents)
+        }
     }
 }
 
-/// Convert &[mc_transaction_core::BlockData] -> blockchain::ArchiveBlocks
-impl From<&[mc_transaction_core::BlockData]> for blockchain::ArchiveBlocks {
-    fn from(src: &[mc_transaction_core::BlockData]) -> Self {
+/// Convert &[BlockData] -> blockchain::ArchiveBlocks
+impl From<&[BlockData]> for blockchain::ArchiveBlocks {
+    fn from(src: &[BlockData]) -> Self {
         let mut archive_blocks = blockchain::ArchiveBlocks::new();
-        archive_blocks.set_blocks(RepeatedField::from_vec(
-            src.iter().map(blockchain::ArchiveBlock::from).collect(),
-        ));
-
+        archive_blocks.set_blocks(src.iter().map(blockchain::ArchiveBlock::from).collect());
         archive_blocks
     }
 }
 
 /// Convert blockchain::ArchiveBlocks -> Vec<mc_transaction_core::BlockData>
-impl TryFrom<&blockchain::ArchiveBlocks> for Vec<mc_transaction_core::BlockData> {
+impl TryFrom<&blockchain::ArchiveBlocks> for Vec<BlockData> {
     type Error = ConversionError;
 
     fn try_from(src: &blockchain::ArchiveBlocks) -> Result<Self, Self::Error> {
         let blocks_data = src
             .get_blocks()
             .iter()
-            .map(mc_transaction_core::BlockData::try_from)
+            .map(BlockData::try_from)
             .collect::<Result<Vec<_>, ConversionError>>()?;
 
-        if blocks_data.len() > 1 {
-            // Ensure blocks_data form a legitimate chain of blocks.
-            for i in 1..blocks_data.len() {
-                let parent_block = &blocks_data[i - 1].block();
-                let block = &blocks_data[i].block();
-
-                let expected_block_id = compute_block_id(
-                    block.version,
-                    &parent_block.id,
-                    block.index,
-                    block.cumulative_txo_count,
-                    &block.root_element,
-                    &block.contents_hash,
-                );
-                if expected_block_id != block.id {
-                    return Err(ConversionError::InvalidContents);
-                }
-            }
+        // Ensure blocks_data form a legitimate chain of blocks.
+        if blocks_data
+            .iter()
+            // Verify that the block ID is consistent with the cached parent ID.
+            .all(|data| data.block().is_block_id_valid())
+            && blocks_data
+                .windows(2)
+                // Verify that the cached parent ID match the previous block's ID.
+                .all(|window| window[1].block().parent_id == window[0].block().id)
+        {
+            Ok(blocks_data)
+        } else {
+            Err(ConversionError::InvalidContents)
         }
-
-        Ok(blocks_data)
     }
 }
 
@@ -176,7 +163,8 @@ mod tests {
             let signature =
                 BlockSignature::from_block_and_keypair(&block, &(signer.into())).unwrap();
 
-            let block_data = BlockData::new(block, block_contents, Some(signature));
+            // FIXME: Add metadata.
+            let block_data = BlockData::new(block, block_contents, signature, None);
             blocks_data.push(block_data);
         }
 

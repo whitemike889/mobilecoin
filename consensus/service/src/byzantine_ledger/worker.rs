@@ -873,7 +873,8 @@ impl<
         // The enclave cannot provide a timestamp, so this happens in untrusted.
         signature.set_signed_at(chrono::Utc::now().timestamp() as u64);
 
-        BlockData::new(block, block_contents, Some(signature))
+        // FIXME: Add metadata.
+        BlockData::new(block, block_contents, signature, None)
     }
 }
 

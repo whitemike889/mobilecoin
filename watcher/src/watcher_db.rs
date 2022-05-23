@@ -1878,13 +1878,12 @@ pub mod tests {
                     BlockData::new(
                         block.clone(),
                         contents.clone(),
-                        Some(
-                            BlockSignature::from_block_and_keypair(
-                                block,
-                                &Ed25519Pair::from_random(&mut rng),
-                            )
-                            .unwrap(),
-                        ),
+                        BlockSignature::from_block_and_keypair(
+                            block,
+                            &Ed25519Pair::from_random(&mut rng),
+                        )
+                        .unwrap(),
+                        None,
                     )
                 })
                 .collect::<Vec<_>>();

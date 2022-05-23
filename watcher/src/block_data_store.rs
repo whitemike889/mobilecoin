@@ -152,6 +152,7 @@ impl BlockDataStore {
             block,
             block_contents,
             stored_block_data.signature,
+            None,
         ))
     }
 
@@ -191,7 +192,7 @@ impl BlockDataStore {
 
             results.insert(
                 tx_source_url,
-                BlockData::new(block, block_contents, stored_block_data.signature),
+                BlockData::new(block, block_contents, stored_block_data.signature, None),
             );
         }
 
@@ -326,6 +327,7 @@ mod tests {
                         )
                         .unwrap(),
                     ),
+                    None,
                 )
             })
             .collect::<Vec<_>>();

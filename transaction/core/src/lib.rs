@@ -4,7 +4,9 @@
 //! routines
 
 #![no_std]
-#![deny(missing_docs)]
+// FIXME: Re-enable when derive(Oneof) generated methods have the necessary
+// docs: https://github.com/tokio-rs/prost/issues/237
+//#![deny(missing_docs)]
 
 extern crate alloc;
 
