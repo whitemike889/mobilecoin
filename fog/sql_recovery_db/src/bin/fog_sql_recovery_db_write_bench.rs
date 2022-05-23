@@ -5,9 +5,8 @@ use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPublic};
 use mc_fog_recovery_db_iface::RecoveryDb;
 use mc_fog_sql_recovery_db::SqlRecoveryDb;
 use mc_fog_test_infra::db_tests::{random_block, random_kex_rng_pubkey};
-use mc_util_from_random::FromRandom;
+use mc_util_from_random::{FromRandom, Rng};
 use rand::thread_rng;
-use rand_core::RngCore;
 use std::{
     env,
     time::{Duration, Instant},
@@ -36,7 +35,7 @@ fn main() {
             break;
         }
 
-        let n_txs = 1 + (rng.next_u32() % 500);
+        let n_txs = rng.gen_range(1..=500);
         let (block, records) = random_block(&mut rng, block_index, n_txs as usize);
 
         let start = Instant::now();
@@ -129,7 +128,7 @@ fn main() {
 
             println!("loaded {} users", user_pub_keys.len());
             loop {
-                let mut key = user_pub_keys[rng.next_u32() as usize % user_pub_keys.len()].clone();
+                let mut key = user_pub_keys[rng.gen_range(0..user_pub_keys.len())].clone();
                 if i % 2 == 0 {
                     key = CompressedRistrettoPublic::from(RistrettoPublic::from_random(&mut rng));
                 }

@@ -83,6 +83,9 @@ pub enum Error {
 
     /// DuplicateMintConfigTx
     DuplicateMintConfigTx,
+
+    /// BlockMetadataRequired
+    BlockMetadataRequired,
 }
 
 impl From<lmdb::Error> for Error {

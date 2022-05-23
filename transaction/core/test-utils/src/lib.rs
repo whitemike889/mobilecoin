@@ -307,14 +307,14 @@ pub fn initialize_ledger<L: Ledger, R: RngCore + CryptoRng>(
             }
         };
 
+        // FIXME: Add metadata, too.
         ledger
-            .append_block(&block, &block_contents, None)
+            .append_block(&block, &block_contents, None, None)
             .expect("failed writing initial transactions");
 
         blocks.push(block.clone());
         parent = Some(block);
-        let tx_out = block_contents.outputs[0].clone();
-        to_spend = Some(tx_out);
+        to_spend = Some(block_contents.outputs[0].clone());
     }
 
     // Verify that db now contains n transactions.
@@ -324,6 +324,7 @@ pub fn initialize_ledger<L: Ledger, R: RngCore + CryptoRng>(
 }
 
 /// Generate a list of blocks, each with a random number of transactions.
+// FIXME: Change to return Vec<BlockData> with metadata.
 pub fn get_blocks<T: Rng + RngCore + CryptoRng>(
     block_version: BlockVersion,
     recipients: &[PublicAddress],

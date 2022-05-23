@@ -67,19 +67,11 @@ where
 }
 
 pub fn encode<T: Message>(value: &T) -> Vec<u8> {
-    let mut buf = Vec::with_capacity(value.encoded_len());
-    value
-        .encode(&mut buf)
-        .expect("prost::encode with an unbounded buffer is no fail");
-    buf
+    value.encode_to_vec()
 }
 
-pub fn decode<T: Message>(buf: &[u8]) -> Result<T, DecodeError>
-where
-    T: core::default::Default,
-{
-    let value = T::decode(buf)?;
-    Ok(value)
+pub fn decode<T: Message + Default>(buf: &[u8]) -> Result<T, DecodeError> {
+    T::decode(buf)
 }
 
 /// Take a prost type and try to roundtrip it through a protobuf type

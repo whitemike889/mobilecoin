@@ -579,7 +579,7 @@ impl<
 
         tracer.in_span("append_block", |_cx| {
             self.ledger
-                .append_block(block_data.block(), block_data.contents(), Some(signature))
+                .append_block_data(&block_data)
                 .expect("failed appending block");
         });
 
@@ -1654,7 +1654,9 @@ mod tests {
             &Default::default(),
             &block_contents,
         );
-        ledger.append_block(&block, &block_contents, None).unwrap();
+        ledger
+            .append_block(&block, &block_contents, None, None)
+            .unwrap();
 
         let signer_set1 = SignerSet::new(signers1.iter().map(|s| s.public_key()).collect(), 1);
         let governors_map = GovernorsMap::try_from_iter([(token_id1, signer_set1)]).unwrap();

@@ -16,7 +16,7 @@ use mc_transaction_core::{
     mint::MintTx,
     ring_signature::KeyImage,
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipProof},
-    Block, BlockContents, BlockData, BlockIndex, BlockSignature, TokenId,
+    Block, BlockContents, BlockData, BlockIndex, BlockMetadata, BlockSignature, TokenId,
 };
 
 #[derive(Default, Clone)]
@@ -93,11 +93,12 @@ pub struct MockLedger {
 }
 
 impl Ledger for MockLedger {
-    fn append_block(
+    fn append_block<'b>(
         &mut self,
-        _block: &Block,
-        _transactions: &BlockContents,
-        _signature: Option<BlockSignature>,
+        _block: &'b Block,
+        _block_contents: &'b BlockContents,
+        _signature: Option<&'b BlockSignature>,
+        _metadata: Option<&'b BlockMetadata>,
     ) -> Result<(), Error> {
         unimplemented!()
     }
@@ -115,6 +116,10 @@ impl Ledger for MockLedger {
     }
 
     fn get_block_signature(&self, _block_number: u64) -> Result<BlockSignature, Error> {
+        unimplemented!()
+    }
+
+    fn get_block_metadata(&self, _block_number: u64) -> Result<BlockMetadata, Error> {
         unimplemented!()
     }
 

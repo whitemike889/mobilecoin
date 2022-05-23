@@ -11,7 +11,7 @@ use mc_transaction_core::{
     tokens::Mob,
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipProof},
     Amount, Block, BlockContents, BlockData, BlockID, BlockIndex, BlockSignature, BlockVersion,
-    Token, TokenId,
+    BlockMetadata, Token, TokenId,
 };
 use mc_util_from_random::FromRandom;
 use rand::{rngs::StdRng, SeedableRng};
@@ -85,11 +85,12 @@ impl MockLedger {
 }
 
 impl Ledger for MockLedger {
-    fn append_block(
+    fn append_block<'b>(
         &mut self,
-        block: &Block,
-        block_contents: &BlockContents,
-        _signature: Option<BlockSignature>,
+        block: &'b Block,
+        block_contents: &'b BlockContents,
+        _signature: Option<&'b BlockSignature>,
+        _metadata: Option<&'b BlockMetadata>,
     ) -> Result<(), Error> {
         assert_eq!(block.index, self.num_blocks().unwrap());
         self.set_block(block, block_contents);
@@ -124,12 +125,16 @@ impl Ledger for MockLedger {
         Err(Error::NotFound)
     }
 
+    fn get_block_metadata(&self, _block_number: u64) -> Result<BlockMetadata, Error> {
+        Err(Error::NotFound)
+    }
+
     fn get_block_data(&self, block_number: u64) -> Result<BlockData, Error> {
         let block = self.get_block(block_number)?;
         let contents = self.get_block_contents(block_number)?;
         let signature = self.get_block_signature(block_number).ok();
-        // FIXME: Add metadata.
-        Ok(BlockData::new(block, contents, signature, None))
+        let metadata = self.get_block_metadata(block_number).ok();
+        Ok(BlockData::new(block, contents, signature, metadata))
     }
 
     /// Gets block index by a TxOut global index.

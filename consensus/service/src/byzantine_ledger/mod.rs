@@ -891,7 +891,10 @@ mod tests {
             &block_contents,
         );
 
-        ledger.append_block(&block, &block_contents, None).unwrap();
+        // FIXME: Add metadata, too.
+        ledger
+            .append_block(&block, &block_contents, None, None)
+            .unwrap();
 
         // Mock peer_manager
         let mock_peer = MockPeerConnection::new(

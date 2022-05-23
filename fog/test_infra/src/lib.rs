@@ -16,6 +16,7 @@ use mc_ledger_db::{Ledger, LedgerDB};
 use mc_transaction_core::{
     ring_signature::KeyImage, Block, BlockContents, BlockSignature, BlockVersion,
 };
+use mc_transaction_core_test_utils::make_block_metadata;
 use mc_util_from_random::FromRandom;
 use mc_watcher::watcher_db::WatcherDB;
 use mc_watcher_api::TimestampResultCode;
@@ -166,8 +167,9 @@ pub fn test_block<T: RngCore + CryptoRng, C: FogViewConnection>(
         );
         (block, block_contents)
     };
+    let metadata = make_block_metadata(block.id.clone(), rng);
     ledger_db
-        .append_block(&block, &block_contents, None)
+        .append_block(&block, &block_contents, None, Some(&metadata))
         .unwrap_or_else(|err| panic!("failed appending block {:?}: {:?}", block, err));
 
     // Make the users poll for transactions, until their num blocks matches
