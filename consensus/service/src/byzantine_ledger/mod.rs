@@ -319,7 +319,6 @@ mod tests {
         tx_manager::{MockTxManager, TxManagerImpl},
         validators::DefaultTxManagerUntrustedInterfaces,
     };
-
     use mc_common::logger::test_with_logger;
     use mc_consensus_enclave_mock::ConsensusServiceMockEnclave;
     use mc_consensus_scp::{core_types::Ballot, msg::*, SlotIndex};
@@ -891,7 +890,6 @@ mod tests {
             &block_contents,
         );
 
-        // FIXME: Add metadata, too.
         ledger
             .append_block(&block, &block_contents, None, None)
             .unwrap();

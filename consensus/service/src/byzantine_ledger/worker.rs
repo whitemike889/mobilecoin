@@ -26,7 +26,7 @@ use mc_peers::{
     Broadcast, ConsensusConnection, ConsensusMsg, ConsensusValue, Error as PeerError,
     RetryableConsensusConnection, VerifiedConsensusMsg,
 };
-use mc_transaction_core::{tx::TxHash, BlockData};
+use mc_transaction_core::{tx::TxHash, BlockData, BlockID, BlockMetadata, BlockMetadataContents};
 use mc_util_metered_channel::Receiver;
 use mc_util_telemetry::{mark_span_as_active, start_block_span, tracer, Tracer};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -873,48 +873,69 @@ impl<
         // The enclave cannot provide a timestamp, so this happens in untrusted.
         signature.set_signed_at(chrono::Utc::now().timestamp() as u64);
 
-        // FIXME: Add metadata.
-        BlockData::new(block, block_contents, signature, None)
+        let metadata = self.get_block_metadata(block.id.clone());
+
+        BlockData::new(block, block_contents, signature, metadata)
+    }
+
+    fn get_block_metadata(&self, block_id: BlockID) -> Option<BlockMetadata> {
+        let verification_report = self.enclave.get_ias_report();
+        if let Err(err) = &verification_report {
+            log::crit!(
+                &self.logger,
+                "Failed to fetch verification report after forming block {:?}: {}",
+                block_id,
+                err
+            );
+        }
+
+        let contents = BlockMetadataContents::new(
+            block_id.clone(),
+            Some((&self.scp_node.quorum_set()).into()),
+            verification_report.ok(),
+        );
+
+        // TODO: Is this the right key for signing the metadata?
+        let metadata_result =
+            BlockMetadata::from_contents_and_keypair(contents, &self.msg_signer_key);
+        if let Err(err) = &metadata_result {
+            log::crit!(
+                &self.logger,
+                "Failed to sign block metadata for block {:?}: {}",
+                block_id,
+                err
+            );
+        }
+
+        metadata_result.ok()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::{
-        byzantine_ledger::{
-            ledger_sync_state::LedgerSyncState,
-            task_message::TaskMessage,
-            tests::{get_local_node_config, get_peers, PeerConfig},
-            worker::ByzantineLedgerWorker,
-            IS_BEHIND_GRACE_PERIOD, MAX_PENDING_VALUES_TO_NOMINATE,
-        },
+        byzantine_ledger::tests::{get_local_node_config, get_peers, PeerConfig},
         mint_tx_manager::{MintTxManagerImpl, MockMintTxManager},
-        tx_manager::{MockTxManager, TxManager, TxManagerError, TxManagerImpl},
+        tx_manager::{MockTxManager, TxManagerError, TxManagerImpl},
         validators::DefaultTxManagerUntrustedInterfaces,
     };
     use mc_account_keys::AccountKey;
-    use mc_common::{
-        logger::{test_with_logger, Logger},
-        NodeID, ResponderId,
-    };
-    use mc_connection::ConnectionManager;
+    use mc_common::{logger::test_with_logger, NodeID};
     use mc_consensus_enclave::GovernorsMap;
     use mc_consensus_enclave_mock::{ConsensusServiceMockEnclave, MockConsensusEnclave};
     use mc_consensus_scp::{
         msg::{NominatePayload, Topic::Nominate},
-        slot::{Phase, SlotMetrics},
-        MockScpNode, Msg, QuorumSet,
+        slot::SlotMetrics,
+        MockScpNode, QuorumSet,
     };
-    use mc_crypto_keys::Ed25519Pair;
     use mc_crypto_multisig::SignerSet;
-    use mc_ledger_db::{Ledger, MockLedger}; // Don't use test_utils::MockLedger.
+    use mc_ledger_db::MockLedger; // Don't use test_utils::MockLedger.
     use mc_ledger_sync::{LedgerSyncError, MockLedgerSync, SCPNetworkState};
-    use mc_peers::{ConsensusMsg, ConsensusValue, MockBroadcast, VerifiedConsensusMsg};
+    use mc_peers::MockBroadcast;
     use mc_peers_test_utils::MockPeerConnection;
     use mc_transaction_core::{
-        tx::{Tx, TxHash},
-        validation::TransactionValidationError,
-        Block, BlockContents, BlockVersion, TokenId,
+        tx::Tx, validation::TransactionValidationError, Block, BlockContents, BlockVersion, TokenId,
     };
     use mc_transaction_core_test_utils::{
         create_ledger, create_mint_config_tx_and_signers, create_mint_tx_to_recipient,
@@ -925,15 +946,7 @@ mod tests {
     use mockall::predicate::eq;
     use rand::rngs::StdRng;
     use rand_core::SeedableRng;
-    use std::{
-        convert::TryFrom,
-        ops::Add,
-        sync::{
-            atomic::{AtomicBool, AtomicU64},
-            Arc, Mutex,
-        },
-        time::{Duration, Instant},
-    };
+    use std::convert::TryFrom;
 
     /// Create test mocks with sensible defaults.
     ///
@@ -1149,9 +1162,7 @@ mod tests {
         // state.
         let behind_since = Instant::now();
         // IS_BEHIND_GRACE_PERIOD + 1 seconds has elapsed
-        let now = behind_since
-            .add(IS_BEHIND_GRACE_PERIOD)
-            .add(Duration::from_secs(1));
+        let now = behind_since + IS_BEHIND_GRACE_PERIOD + Duration::from_secs(1);
         next_sync_state_helper(
             LedgerSyncState::MaybeBehind(behind_since),
             true,
@@ -1706,8 +1717,11 @@ mod tests {
         worker.tick();
 
         // A new block should appear, with the outputs of our transactions.
-        let block = ledger.get_block(ledger.num_blocks().unwrap() - 1).unwrap();
-        let block_contents = ledger.get_block_contents(block.index).unwrap();
+        let block_data = ledger
+            .get_block_data(ledger.num_blocks().unwrap() - 1)
+            .unwrap();
+        let block = block_data.block();
+        let block_contents = block_data.contents();
         let parent_block = ledger.get_block(block.index - 1).unwrap();
 
         assert_eq!(block.index, parent_block.index + 1);
@@ -1723,6 +1737,10 @@ mod tests {
 
         // Our mint tx should make it into the block.
         assert_eq!(block_contents.mint_txs, vec![mint_tx1]);
+
+        // The block should have a signature and metadata.
+        assert!(block_data.signature().is_some());
+        assert!(block_data.metadata().is_some());
     }
 
     // TODO: test process_consensus_msgs
