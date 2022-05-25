@@ -82,6 +82,27 @@ where
     Ok(value)
 }
 
+/// Take a prost type and try to roundtrip it through a protobuf type
+#[cfg(feature = "test_utils")]
+pub fn round_trip_message<SRC: Message + Eq + Default, DEST: protobuf::Message>(prost_val: &SRC) {
+    let prost_bytes = encode(prost_val);
+
+    let dest_val =
+        DEST::parse_from_bytes(&prost_bytes).expect("Parsing protobuf from prost bytes failed");
+
+    let protobuf_bytes = dest_val
+        .write_to_bytes()
+        .expect("Writing protobuf to bytes failed");
+
+    let final_val: SRC = decode(&protobuf_bytes).expect("Parsing prost from protobuf bytes failed");
+
+    assert_eq!(
+        *prost_val, final_val,
+        "Round-trip check failed!\nprost: {:?}\nprotobuf: {:?}",
+        prost_val, final_val
+    );
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

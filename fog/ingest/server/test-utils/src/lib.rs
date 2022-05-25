@@ -19,6 +19,7 @@ use mc_transaction_core::{
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash},
     Block, BlockContents, BlockData, BlockSignature, BlockVersion, MaskedAmount,
 };
+use mc_transaction_core_test_utils::make_block_metadata;
 use mc_util_from_random::FromRandom;
 use mc_watcher::watcher_db::WatcherDB;
 use rand_core::{CryptoRng, RngCore, SeedableRng};
@@ -394,12 +395,13 @@ pub fn add_test_block<T: RngCore + CryptoRng>(
             .as_secs(),
     );
 
+    let metadata = make_block_metadata(block.id.clone(), rng);
+
     ledger
         .append_block(&block, &block_contents, None)
         .expect("Could not append block");
 
-    // FIXME: Add metadata.
-    let block_data = BlockData::new(block, block_contents, block_sig.clone(), None);
+    let block_data = BlockData::new(block, block_contents, block_sig.clone(), metadata);
 
     watcher
         .add_block_data(&tx_source_url, &block_data)

@@ -47,11 +47,3 @@ fn get_seeds() -> [Seed; NUM_TRIALS] {
 pub fn get_seeded_rng() -> RngType {
     RngType::from_seed([7u8; 32])
 }
-
-pub fn random_str(rng: &mut RngType, len: usize) -> String {
-    use rand::{distributions::Alphanumeric, Rng};
-    rng.sample_iter(&Alphanumeric)
-        .take(len)
-        .map(char::from)
-        .collect()
-}

@@ -6,5 +6,9 @@ edition = "2021"
 description = "A trait for constructing an object from a random number generator."
 readme = "README.md"
 
+[features]
+default = []
+std = ["rand/std"]
+
 [dependencies]
-rand_core = "0.6"
+rand = { version = "0.8", default-features = false }

@@ -113,6 +113,7 @@ mod tests {
         Amount, Block, BlockContents, BlockData, BlockID, BlockSignature, BlockVersion,
         MaskedAmount, Token,
     };
+    use mc_transaction_core_test_utils::make_block_metadata;
     use mc_util_from_random::FromRandom;
     use rand::{rngs::StdRng, SeedableRng};
 
@@ -163,8 +164,8 @@ mod tests {
             let signature =
                 BlockSignature::from_block_and_keypair(&block, &(signer.into())).unwrap();
 
-            // FIXME: Add metadata.
-            let block_data = BlockData::new(block, block_contents, signature, None);
+            let metadata = make_block_metadata(block.id.clone(), &mut rng);
+            let block_data = BlockData::new(block, block_contents, signature, metadata);
             blocks_data.push(block_data);
         }
 

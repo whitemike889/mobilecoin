@@ -41,6 +41,7 @@ use mc_transaction_core::{
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipHash},
     Amount, Block, BlockContents, BlockData, BlockSignature, BlockVersion, Token,
 };
+use mc_transaction_core_test_utils::make_block_metadata;
 use mc_util_from_random::FromRandom;
 use rand_core::SeedableRng;
 use rand_hc::Hc128Rng;
@@ -225,8 +226,8 @@ fn main() {
             .append_block(&block, &block_contents, None)
             .expect("Could not append block");
 
-        // FIXME: Add metadata.
-        let block_data = BlockData::new(block, block_contents, block_sig.clone(), None);
+        let metadata = make_block_metadata(block.id.clone(), &mut rng);
+        let block_data = BlockData::new(block, block_contents, block_sig.clone(), metadata);
 
         watcher
             .add_block_data(&tx_source_url, &block_data)

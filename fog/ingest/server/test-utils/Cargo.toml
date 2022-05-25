@@ -12,6 +12,7 @@ mc-common = { path = "../../../../common", features = ["loggers"] }
 mc-crypto-keys = { path = "../../../../crypto/keys", default-features = false }
 mc-ledger-db = { path = "../../../../ledger/db" }
 mc-transaction-core = { path = "../../../../transaction/core" }
+mc-transaction-core-test-utils = { path = "../../../../transaction/core/test-utils" }
 mc-util-from-random = { path = "../../../../util/from-random" }
 mc-watcher = { path = "../../../../watcher" }
 
@@ -21,7 +22,6 @@ mc-fog-ingest-server = { path = ".." }
 mc-fog-recovery-db-iface = { path = "../../../recovery_db_iface" }
 mc-fog-sql-recovery-db = { path = "../../../sql_recovery_db" }
 mc-fog-test-infra = { path = "../../../test_infra" }
-mc-fog-types = { path = "../../../types" }
 mc-fog-uri = { path = "../../../uri" }
 
 # third-party

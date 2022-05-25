@@ -11,23 +11,26 @@ pub use mc_transaction_core::{
     ring_signature::KeyImage,
     tokens::Mob,
     tx::{Tx, TxOut, TxOutMembershipElement, TxOutMembershipHash},
-    Amount, Block, BlockID, BlockIndex, BlockVersion, Token,
+    Amount, Block, BlockID, BlockIndex, BlockMetadata, BlockMetadataContents, BlockVersion,
+    QuorumNode, QuorumSet, Token, VerificationReport,
 };
+pub use mc_util_serial::round_trip_message;
 pub use mint::{
     create_mint_config_tx, create_mint_config_tx_and_signers, create_mint_tx,
     create_mint_tx_to_recipient, mint_config_tx_to_validated,
 };
 
 use core::convert::TryFrom;
-use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPrivate, RistrettoPublic};
+use mc_crypto_keys::{CompressedRistrettoPublic, Ed25519Pair, RistrettoPrivate, RistrettoPublic};
 use mc_ledger_db::{Ledger, LedgerDB};
 use mc_transaction_core::{constants::RING_SIZE, membership_proofs::Range, BlockContents};
 use mc_transaction_std::{
     DefaultTxOutputsOrdering, EmptyMemoBuilder, InputCredentials, TransactionBuilder,
     TxOutputsOrdering,
 };
-use mc_util_from_random::FromRandom;
-use rand::{seq::SliceRandom, CryptoRng, Rng, RngCore};
+use mc_util_from_random::{random_bytes_vec, FromRandom};
+use rand::{seq::SliceRandom, CryptoRng, Rng, RngCore, SeedableRng};
+use rand_hc::Hc128Rng as FixedRng;
 use std::cmp::Ordering;
 use tempdir::TempDir;
 
@@ -415,4 +418,58 @@ pub fn create_test_tx_out(rng: &mut (impl RngCore + CryptoRng)) -> TxOut {
         Default::default(),
     )
     .unwrap()
+}
+
+pub fn make_test_node(node_id: u32) -> QuorumNode {
+    make_test_node_and_signer(node_id).0
+}
+
+pub fn make_test_node_and_signer(node_id: u32) -> (QuorumNode, Ed25519Pair) {
+    let mut seed_bytes = [0u8; 32];
+    let node_id_bytes = node_id.to_be_bytes();
+    seed_bytes[..node_id_bytes.len()].copy_from_slice(&node_id_bytes[..]);
+    let mut seeded_rng = FixedRng::from_seed(seed_bytes);
+
+    let signer_keypair = Ed25519Pair::from_random(&mut seeded_rng);
+    let public_key = signer_keypair.public_key();
+    (
+        QuorumNode {
+            responder_id: format!("node{}.test.com:8443", node_id),
+            public_key,
+        },
+        signer_keypair,
+    )
+}
+
+pub fn make_quorum_set<RNG: RngCore + CryptoRng>(num_nodes: u32, rng: &mut RNG) -> QuorumSet {
+    let threshold = rng.gen_range(1..=num_nodes);
+    let node_ids = (0..num_nodes).map(make_test_node).collect();
+    QuorumSet::new_with_node_ids(threshold, node_ids)
+}
+
+pub fn make_verification_report<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> VerificationReport {
+    let sig = random_bytes_vec(42, rng).into();
+    let chain_len = rng.gen_range(2..42);
+    let chain = (1..=chain_len)
+        .map(|n| random_bytes_vec(n as usize, rng))
+        .collect();
+    VerificationReport {
+        sig,
+        chain,
+        http_body: "testing".to_owned(),
+    }
+}
+
+pub fn make_block_metadata<RNG: RngCore + CryptoRng>(
+    block_id: BlockID,
+    rng: &mut RNG,
+) -> BlockMetadata {
+    let signer = Ed25519Pair::from_random(rng);
+    let metadata = BlockMetadataContents::new(
+        block_id,
+        Some(make_quorum_set(rng.gen_range(1..=42), rng)),
+        Some(make_verification_report(rng)),
+    );
+    BlockMetadata::from_contents_and_keypair(metadata, &signer)
+        .expect("BlockMetadata::from_contents_and_keypair")
 }

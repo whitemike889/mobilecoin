@@ -5,7 +5,10 @@
 
 #![no_std]
 
-use rand_core::{CryptoRng, RngCore};
+pub use rand::{CryptoRng, Fill, Rng, RngCore, SeedableRng};
+
+extern crate alloc;
+use alloc::{string::String, vec::Vec};
 
 /// A trait which can construct an object from a cryptographically secure
 /// pseudo-random number generator.
@@ -20,4 +23,18 @@ impl<const N: usize> FromRandom for [u8; N] {
         csprng.fill_bytes(&mut result);
         result
     }
+}
+
+pub fn random_bytes_vec<R: CryptoRng + RngCore>(num_bytes: usize, csprng: &mut R) -> Vec<u8> {
+    let mut result = Vec::with_capacity(num_bytes);
+    csprng.fill_bytes(&mut result);
+    result
+}
+
+pub fn random_str<R: CryptoRng + RngCore>(len: usize, csprng: &mut R) -> String {
+    csprng
+        .sample_iter(rand::distributions::Alphanumeric)
+        .take(len)
+        .map(char::from)
+        .collect()
 }
