@@ -931,8 +931,7 @@ mod ledger_db_test {
         create_test_tx_out, mint_config_tx_to_validated as to_validated,
     };
     use mc_util_from_random::FromRandom;
-    use rand::{rngs::StdRng, SeedableRng};
-    use rand_core::RngCore;
+    use rand::{rngs::StdRng, RngCore, SeedableRng};
     use tempdir::TempDir;
     use test::Bencher;
 

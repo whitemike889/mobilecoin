@@ -9,7 +9,10 @@ mod util;
 
 use alloc::vec::Vec;
 use mc_crypto_keys::{CompressedRistrettoPublic, ReprBytes};
-use mc_ledger_db::Ledger;
+use mc_ledger_db::{
+    test_utils::{InverseTxOutputsOrdering, INITIALIZE_LEDGER_AMOUNT},
+    Ledger,
+};
 use mc_transaction_core::{
     constants::{MAX_TOMBSTONE_BLOCKS, RING_SIZE},
     membership_proofs::Range,
@@ -18,7 +21,6 @@ use mc_transaction_core::{
     validation::*,
     BlockVersion, InputRules, Token,
 };
-use mc_transaction_core_test_utils::{InverseTxOutputsOrdering, INITIALIZE_LEDGER_AMOUNT};
 use mc_util_test_helper::get_seeded_rng;
 use util::*;
 

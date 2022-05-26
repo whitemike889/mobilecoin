@@ -146,12 +146,14 @@ mod tests {
     use grpcio::{ChannelBuilder, Environment, Server, ServerBuilder};
     use mc_account_keys::AccountKey;
     use mc_common::logger::{test_with_logger, Logger};
-    use mc_ledger_db::Ledger;
+    use mc_ledger_db::{
+        test_utils::{create_ledger, initialize_ledger},
+        Ledger,
+    };
     use mc_mint_auditor_api::{mint_auditor_grpc::MintAuditorApiClient, BlockAuditData};
     use mc_transaction_core::{Block, BlockContents, BlockVersion, TokenId};
     use mc_transaction_core_test_utils::{
-        create_ledger, create_mint_config_tx_and_signers, create_mint_tx, create_test_tx_out,
-        initialize_ledger,
+        create_mint_config_tx_and_signers, create_mint_tx, create_test_tx_out,
     };
     use rand_core::SeedableRng;
     use rand_hc::Hc128Rng;
