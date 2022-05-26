@@ -328,7 +328,7 @@ mod tests {
             watcher_db
                 .get_block_data_map(blocks_data[0].block().index)
                 .unwrap(),
-            HashMap::from_iter(vec![(tx_src_url1.clone(), blocks_data[0].clone()),])
+            HashMap::from_iter([(tx_src_url1.clone(), blocks_data[0].clone()),])
         );
         assert_eq!(
             watcher_db
@@ -346,7 +346,7 @@ mod tests {
             watcher_db
                 .get_block_data_map(blocks_data[0].block().index)
                 .unwrap(),
-            HashMap::from_iter(vec![
+            HashMap::from_iter([
                 (tx_src_url1.clone(), blocks_data[0].clone()),
                 (tx_src_url2.clone(), blocks_data[0].clone()),
             ])
@@ -372,7 +372,7 @@ mod tests {
             watcher_db
                 .get_block_data_map(blocks_data[0].block().index)
                 .unwrap(),
-            HashMap::from_iter(vec![
+            HashMap::from_iter([
                 (tx_src_url1, blocks_data[0].clone()),
                 (tx_src_url2.clone(), blocks_data[0].clone()),
             ])
@@ -381,7 +381,7 @@ mod tests {
             watcher_db
                 .get_block_data_map(blocks_data[1].block().index)
                 .unwrap(),
-            HashMap::from_iter(vec![(tx_src_url2, blocks_data[1].clone()),])
+            HashMap::from_iter([(tx_src_url2, blocks_data[1].clone()),])
         );
     }
 }

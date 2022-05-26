@@ -1064,17 +1064,14 @@ mod test_build_transaction_helper {
             let sender_public_address = sender_account_key.default_subaddress();
 
             // Amount per input.
-            let initial_amount = 300 * MILLIMOB_TO_PICOMOB;
-            let amount_to_send = Amount {
-                value: 457 * MILLIMOB_TO_PICOMOB,
-                token_id: Mob::ID,
-            };
+            let initial_amount = Amount::new(300 * MILLIMOB_TO_PICOMOB, Mob::ID);
+            let amount_to_send = Amount::new(457 * MILLIMOB_TO_PICOMOB, Mob::ID);
             let num_inputs = 3;
             let ring_size = 1;
 
             // Create inputs.
             let inputs = {
-                let mut recipient_and_amount: Vec<(PublicAddress, u64)> = Vec::new();
+                let mut recipient_and_amount = Vec::with_capacity(num_inputs);
                 for _i in 0..num_inputs {
                     recipient_and_amount.push((sender_public_address.clone(), initial_amount));
                 }
@@ -1118,9 +1115,10 @@ mod test_build_transaction_helper {
             let mut rings: Vec<Vec<TxOut>> = Vec::new();
             for _i in 0..num_inputs {
                 let ring: Vec<TxOut> = {
-                    let mut recipient_and_amount: Vec<(PublicAddress, u64)> = Vec::new();
+                    let mut recipient_and_amount = Vec::with_capacity(ring_size);
                     for _i in 0..ring_size {
-                        recipient_and_amount.push((sender_public_address.clone(), 33));
+                        recipient_and_amount
+                            .push((sender_public_address.clone(), Amount::new(33, Mob::ID)));
                     }
                     get_outputs(block_version, &recipient_and_amount, &mut rng)
                 };

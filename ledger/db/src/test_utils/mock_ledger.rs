@@ -1,18 +1,16 @@
 // Copyright (c) 2018-2022 The MobileCoin Foundation
 
 use crate::{ActiveMintConfig, ActiveMintConfigs, Error, Ledger};
-use mc_account_keys::AccountKey;
 use mc_common::{HashMap, HashSet};
-use mc_crypto_keys::{CompressedRistrettoPublic, RistrettoPrivate};
+use mc_crypto_keys::CompressedRistrettoPublic;
 use mc_transaction_core::{
-    constants::TOTAL_MOB,
     mint::MintTx,
     ring_signature::KeyImage,
     tx::{TxOut, TxOutMembershipElement, TxOutMembershipProof},
     Block, BlockContents, BlockData, BlockID, BlockIndex, BlockMetadata, BlockSignature,
     BlockVersion, TokenId,
 };
-use mc_util_from_random::{CryptoRng, FromRandom, RngCore};
+use mc_transaction_core_test_utils::get_blocks;
 use mc_util_test_helper::get_seeded_rng;
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -229,216 +227,24 @@ impl Ledger for MockLedger {
 /// Creates a MockLedger and populates it with blocks and transactions.
 pub fn get_mock_ledger(n_blocks: usize) -> MockLedger {
     let mut mock_ledger = MockLedger::default();
-    let blocks_and_transactions = get_test_ledger_blocks(n_blocks);
-    for (block, block_contents) in blocks_and_transactions {
-        mock_ledger.set_block(&block, &block_contents);
+    for block_data in get_test_ledger_blocks(n_blocks) {
+        mock_ledger
+            .append_block_data(&block_data)
+            .expect("failed to initialize MockLedger");
     }
     mock_ledger
 }
 
-pub fn get_test_ledger_blocks(n_blocks: usize) -> Vec<(Block, BlockContents)> {
-    get_custom_test_ledger_blocks(
+/// Creates a sequence of [BlockData] for testing.
+pub fn get_test_ledger_blocks(num_blocks: usize) -> Vec<BlockData> {
+    get_blocks(
         BlockVersion::ZERO,
+        num_blocks,
+        2,
         1,
         1,
-        1,
-        n_blocks,
-        1,
-        0,
+        1 << 20,
+        None,
         &mut get_seeded_rng(),
     )
-}
-
-/// Get blocks with custom content in order to simulate conditions seen in
-/// production
-///
-/// * `outputs_per_recipient_per_token_per_block` - number of outputs for each
-///   unique token type per account per block
-/// * `num_accounts` - number of accounts in the blocks
-/// * `num_blocks` - number of simulated blocks to create
-/// * `key_images_per_block` - number of key images per block
-/// * `max_token_id` - number of distinct token ids in blocks
-pub fn get_custom_test_ledger_blocks<R: RngCore + CryptoRng>(
-    block_version: BlockVersion,
-    amount_per_output: u64,
-    outputs_per_recipient_per_token_per_block: usize,
-    num_accounts: usize,
-    num_blocks: usize,
-    key_images_per_block: usize,
-    max_token_id: u64,
-    rng: &mut R,
-) -> Vec<(Block, BlockContents)> {
-    // Number of total tx outputs in all blocks
-    let num_outputs_per_block =
-        num_accounts * outputs_per_recipient_per_token_per_block * (max_token_id as usize + 1);
-    let num_outputs = num_blocks * num_outputs_per_block;
-
-    // Initialize other defaults
-    let picomob_per_output: u64 =
-        ((TOTAL_MOB as f64 / num_outputs as f64) * 1000000000000.0) as u64;
-    let recipients = (0..num_accounts)
-        .map(|_| AccountKey::random(&mut rng).default_subaddress())
-        .collect::<Vec<_>>();
-
-    let mut previous_block: Option<Block> = None;
-
-    // Create the tx outs for all of the simulated blocks
-    (0..num_blocks)
-        .map(|_| {
-            let mut outputs: Vec<TxOut> = Vec::with_capacity(num_outputs_per_block);
-            for recipient in &recipients {
-                let tx_private_key = RistrettoPrivate::from_random(&mut rng);
-                for _ in 0..outputs_per_recipient_per_token_per_block {
-                    // Create outputs for each token id
-                    for token_id in 0..=max_token_id {
-                        let amount = Amount::new(picomob_per_output, token_id.into());
-                        let mut tx_out =
-                            TxOut::new(amount, recipient, &tx_private_key, Default::default())
-                                .expect("TxOut::new");
-                        if !block_version.e_memo_feature_is_supported() {
-                            tx_out.e_memo = None;
-                        }
-
-                        outputs.push(tx_out);
-                    }
-                }
-            }
-
-            // Create key images unless we're at the origin block
-            let key_images: Vec<KeyImage> = if previous_block.is_some() {
-                (0..key_images_per_block)
-                    .map(|_i| KeyImage::from(rng.next_u64()))
-                    .collect()
-            } else {
-                Default::default()
-            };
-
-            let block_contents = BlockContents {
-                key_images,
-                outputs: outputs.clone(),
-                ..Default::default()
-            };
-
-            // Create a block with the desired contents
-            let block = match previous_block {
-                Some(parent) => Block::new_with_parent(
-                    block_version,
-                    &parent,
-                    &Default::default(),
-                    &block_contents,
-                ),
-                None => Block::new_origin_block(&outputs),
-            };
-
-            previous_block = Some(block.clone());
-
-            // FIXME: populate!
-            let signature = None;
-            let metadata = None;
-            BlockData::new(block, block_contents, signature, metadata)
-        })
-        .collect()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use mc_transaction_core::compute_block_id;
-
-    #[test]
-    // `get_custom_test_ledger_blocks` should return blocks that match the
-    // configuration specified in the arguments and pass all normal
-    // consistency tests
-    fn test_custom_block_correctness() {
-        let blocks_and_transactions =
-            get_custom_test_ledger_blocks(BlockVersion::MAX, 2, 3, 3, 3, 0);
-
-        let blocks: Vec<Block> = blocks_and_transactions
-            .iter()
-            .map(|(block, _transactions)| block.clone())
-            .collect();
-
-        // Ensure the correct amount of blocks have been created
-        assert_eq!(blocks_and_transactions.len(), 3);
-
-        // Ensure the origin block id isn't a hash of another block
-        let origin_block: &Block = blocks.get(0).unwrap();
-        assert_eq!(origin_block.parent_id.as_ref(), [0u8; 32]);
-        assert_eq!(origin_block.index, 0);
-
-        for (block, block_contents) in blocks_and_transactions.iter() {
-            let derived_block_id = compute_block_id(
-                block.version,
-                &block.parent_id,
-                block.index,
-                block.cumulative_txo_count,
-                &block.root_element,
-                &block.contents_hash,
-            );
-
-            // Ensure the block_id matches the id computed via the merlin transcript
-            assert_eq!(derived_block_id, block.id);
-
-            // Ensure stated block hash matches the computed hash
-            assert_eq!(block.contents_hash, block_contents.hash());
-
-            // Ensure the amount of transactions present matches expected amount
-            assert_eq!(block.cumulative_txo_count, (block.index + 1) * 6);
-
-            // Ensure the correct number of key images exist
-            if block.index == 0 {
-                assert_eq!(block_contents.key_images.len(), 0);
-            } else {
-                assert_eq!(block_contents.key_images.len(), 3);
-            }
-        }
-    }
-
-    #[test]
-    // `get_test_ledger_blocks` should return a valid blockchain of the specified
-    // length.
-    fn test_get_test_ledger_blocks() {
-        let blocks_and_transactions = get_test_ledger_blocks(3);
-        assert_eq!(
-            blocks_and_transactions.len(),
-            3,
-            "{:#?}",
-            blocks_and_transactions
-        );
-
-        let blocks: Vec<Block> = blocks_and_transactions
-            .iter()
-            .map(|(block, _transactions)| block.clone())
-            .collect();
-
-        // The first block must be the origin block.
-        let origin_block: &Block = blocks.get(0).unwrap();
-        assert_eq!(origin_block.parent_id.as_ref(), [0u8; 32]);
-        assert_eq!(origin_block.index, 0);
-
-        // Each block's parent_id must be the block_id of the previous block.
-        let mut previous_block = origin_block;
-        for block in blocks[1..].iter() {
-            assert_eq!(block.parent_id, previous_block.id);
-            previous_block = block;
-        }
-
-        // Each block's ID must agree with the block content hashes.
-        for (block, _transactions) in blocks_and_transactions.iter() {
-            let derived_block_id = compute_block_id(
-                block.version,
-                &block.parent_id,
-                block.index,
-                block.cumulative_txo_count,
-                &block.root_element,
-                &block.contents_hash,
-            );
-            assert_eq!(block.id, derived_block_id);
-        }
-
-        // Contents hashes maust match contents
-        for (block, block_contents) in blocks_and_transactions {
-            assert_eq!(block.contents_hash, block_contents.hash());
-        }
-    }
 }

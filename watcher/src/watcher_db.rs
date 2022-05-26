@@ -1099,13 +1099,12 @@ pub fn create_or_open_rw_watcher_db(
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use mc_account_keys::AccountKey;
     use mc_common::logger::{test_with_logger, Logger};
     use mc_crypto_keys::Ed25519Pair;
-    use mc_transaction_core::{Block, BlockVersion, VerificationSignature};
+    use mc_transaction_core::{BlockVersion, VerificationSignature};
     use mc_transaction_core_test_utils::get_blocks;
     use mc_util_from_random::FromRandom;
-    use mc_util_test_helper::run_with_one_seed;
+    use mc_util_test_helper::{get_seeded_rng, run_with_one_seed};
     use rand_core::SeedableRng;
     use rand_hc::Hc128Rng;
     use std::iter::FromIterator;
@@ -1118,23 +1117,27 @@ pub mod tests {
     }
 
     pub fn setup_blocks() -> Vec<BlockData> {
-        let mut rng: Hc128Rng = Hc128Rng::from_seed([8u8; 32]);
-        let origin = Block::new_origin_block(&[]);
-
-        let accounts: Vec<AccountKey> = (0..20).map(|_i| AccountKey::random(&mut rng)).collect();
-        let recipient_pub_keys = accounts
-            .iter()
-            .map(|account| account.default_subaddress())
-            .collect::<Vec<_>>();
         get_blocks(
             BlockVersion::ZERO,
-            &recipient_pub_keys,
+            20,
             10,
             1,
             10,
-            &origin,
-            &mut rng,
+            1 << 20,
+            None,
+            &mut get_seeded_rng(),
         )
+        .into_iter()
+        .map(|block_data| {
+            // Strip out the metadata, since WatcherDB does not track it.
+            BlockData::new(
+                block_data.block().clone(),
+                block_data.contents().clone(),
+                block_data.signature().clone(),
+                None,
+            )
+        })
+        .collect()
     }
 
     // SignatureStore should insert and get multiple signatures.
@@ -1874,47 +1877,18 @@ pub mod tests {
         // Removing a URL that has no data should work.
         watcher_db.remove_all_for_source_url(&url1).unwrap();
 
-            // Add data for url1 and url2.
-            let filename = String::from("00/00");
-            for block_data in blocks_data.iter() {
-                watcher_db.add_block_data(&url1, block_data).unwrap();
-                watcher_db
-                    .add_block_signature(
-                        &url1,
-                        block_data.block().index,
-                        block_data.signature().clone().unwrap(),
-                        filename.clone(),
-                    )
-                    .unwrap();
-
-                watcher_db.add_block_data(&url2, block_data).unwrap();
-                watcher_db
-                    .add_block_signature(
-                        &url2,
-                        block_data.block().index,
-                        block_data.signature().clone().unwrap(),
-                        filename.clone(),
-                    )
-                    .unwrap();
-
-                watcher_db
-                    .add_verification_report(
-                        &url1,
-                        block_data.signature().clone().unwrap().signer(),
-                        &verification_report_a,
-                        &[],
-                    )
-                    .unwrap();
-
-                watcher_db
-                    .add_verification_report(
-                        &url2,
-                        block_data.signature().clone().unwrap().signer(),
-                        &verification_report_a,
-                        &[],
-                    )
-                    .unwrap();
-            }
+        // Add data for url1 and url2.
+        let filename = String::from("00/00");
+        for block_data in &blocks_data {
+            watcher_db.add_block_data(&url1, block_data).unwrap();
+            watcher_db
+                .add_block_signature(
+                    &url1,
+                    block_data.block().index,
+                    block_data.signature().clone().unwrap(),
+                    filename.clone(),
+                )
+                .unwrap();
 
             watcher_db.add_block_data(&url2, block_data).unwrap();
             watcher_db

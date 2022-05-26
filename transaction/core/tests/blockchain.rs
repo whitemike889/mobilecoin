@@ -1,30 +1,18 @@
-use mc_account_keys::AccountKey;
-use mc_transaction_core::{Block, BlockVersion};
+use mc_transaction_core::BlockVersion;
+use mc_transaction_core_test_utils::get_blocks;
 
 #[test]
 fn test_cumulative_txo_counts() {
     mc_util_test_helper::run_with_several_seeds(|mut rng| {
         for block_version in BlockVersion::iterator() {
-            let origin = Block::new_origin_block(&[]);
+            let num_tokens = if block_version.mixed_transactions_are_supported() {
+                3
+            } else {
+                1
+            };
+            let results = get_blocks(block_version, 50, 20, num_tokens, 5, 50, None, &mut rng);
 
-            let accounts: Vec<AccountKey> =
-                (0..20).map(|_i| AccountKey::random(&mut rng)).collect();
-            let recipient_pub_keys = accounts
-                .iter()
-                .map(|account| account.default_subaddress())
-                .collect::<Vec<_>>();
-
-            let results = mc_transaction_core_test_utils::get_blocks(
-                block_version,
-                &recipient_pub_keys[..],
-                1,
-                50,
-                50,
-                &origin,
-                &mut rng,
-            );
-
-            let mut parent = origin.clone();
+            let mut parent = results[0].block().clone();
             for block_data in results {
                 let block = block_data.block();
                 let block_txo_count = block_data.contents().outputs.len() as u64;

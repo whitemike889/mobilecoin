@@ -9,11 +9,10 @@ name = "generate-sample-ledger"
 path = "src/bin/generate_sample_ledger.rs"
 
 [dependencies]
-mc-account-keys = { path = "../../account-keys" }
 mc-common = { path = "../../common", features = ["log", "loggers"] }
-mc-crypto-keys = { path = "../../crypto/keys" }
-mc-ledger-db = { path = "../../ledger/db" }
+mc-ledger-db = { path = "../../ledger/db", features = ["test_utils"] }
 mc-transaction-core = { path = "../../transaction/core" }
+mc-transaction-core-test-utils = { path = "../../transaction/core/test-utils" }
 mc-util-build-info = { path = "../../util/build/info" }
 mc-util-from-random = { path = "../../util/from-random" }
 mc-util-keyfile = { path = "../../util/keyfile" }

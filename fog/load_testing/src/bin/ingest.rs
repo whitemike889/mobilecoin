@@ -25,17 +25,18 @@ use mc_fog_recovery_db_iface::RecoveryDb;
 use mc_fog_sql_recovery_db::test_utils::SqlRecoveryDbTestContext;
 use mc_fog_uri::{ConnectionUri, FogIngestUri, IngestPeerUri};
 use mc_ledger_db::{test_utils::initialize_ledger, Ledger, LedgerDB};
-use mc_transaction_core::{Block, BlockContents, BlockSignature, BlockVersion};
+use mc_transaction_core::{BlockData, BlockSignature, BlockVersion};
+use mc_transaction_core_test_utils::get_blocks;
 use mc_util_from_random::FromRandom;
 use mc_util_grpc::{admin_grpc::AdminApiClient, ConnectionUriGrpcioChannel, Empty};
 use mc_util_uri::AdminUri;
 use mc_watcher::watcher_db::WatcherDB;
-use rand::thread_rng;
 use retry::{delay, retry, OperationResult};
 use std::{
     path::Path,
     str::FromStr,
     sync::Arc,
+    thread::sleep,
     time::{Duration, Instant},
 };
 use tempdir::TempDir;
@@ -158,7 +159,10 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
         ..Default::default()
     };
 
-    let signer = Ed25519Pair::from_random(&mut thread_rng());
+    let mut csprng = McRng {};
+    let rng = &mut csprng;
+
+    let signer = Ed25519Pair::from_random(rng);
 
     {
         // First make grpcio env
@@ -211,8 +215,8 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
             block_version,
             &mut ledger_db,
             1u64,
-            &AccountKey::random(&mut McRng {}),
-            &mut McRng {},
+            &AccountKey::random(rng),
+            rng,
         );
 
         // Dir for state file
@@ -284,7 +288,7 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
             ingest_client
                 .activate()
                 .expect("Could not activate ingest server");
-            std::thread::sleep(std::time::Duration::from_millis(10));
+            sleep(Duration::from_millis(10));
             ingest_server.assert_not_stopped();
         }
 
@@ -303,27 +307,20 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
                 ledger_db.num_txos().unwrap()
             );
 
-            let accounts: Vec<AccountKey> = (0..20)
-                .map(|_i| AccountKey::random(&mut McRng {}))
-                .collect();
-            let recipient_pub_keys = accounts
-                .iter()
-                .map(|account| account.default_subaddress())
-                .collect::<Vec<_>>();
-
-            let results: Vec<BlockData> = mc_transaction_core_test_utils::get_blocks(
+            let results: Vec<BlockData> = get_blocks(
                 block_version,
-                &recipient_pub_keys[..],
+                20,
                 REPETITIONS,
+                1,
                 CHUNK_SIZE,
-                CHUNK_SIZE,
-                &last_block,
-                &mut McRng {},
+                CHUNK_SIZE as u64,
+                last_block,
+                rng,
             );
 
             log::info!(
                 logger,
-                "Adding blocks with {} Txos ({} reptitions)",
+                "Adding blocks with {} Txos ({} repetitions)",
                 CHUNK_SIZE,
                 REPETITIONS
             );
@@ -374,7 +371,7 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
                     {
                         break;
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(10));
+                    sleep(Duration::from_millis(10));
                     if start.elapsed() >= std::time::Duration::from_secs(60) {
                         panic!("Time exceeded 30 seconds");
                     }
@@ -402,7 +399,7 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
     // in the meantime we can just sleep after grpcio env and all related
     // objects have been destroyed, and hope that those 6 threads see the
     // shutdown requests within 1 second.
-    std::thread::sleep(std::time::Duration::from_millis(1000));
+    sleep(Duration::from_millis(1000));
 
     test_results
 }

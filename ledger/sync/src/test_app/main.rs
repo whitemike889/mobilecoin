@@ -2,7 +2,6 @@
 
 //! Ledger Sync test app
 
-use mc_account_keys::AccountKey;
 use mc_attest_verifier::{MrSignerVerifier, Verifier, DEBUG_ENCLAVE};
 use mc_common::{logger::log, ResponderId};
 use mc_connection::{ConnectionManager, HardcodedCredentialsProvider, ThickClient};
@@ -10,6 +9,7 @@ use mc_consensus_scp::{test_utils::test_node_id, QuorumSet};
 use mc_ledger_db::{Ledger, LedgerDB};
 use mc_ledger_sync::{LedgerSync, LedgerSyncService, PollingNetworkState};
 use mc_transaction_core::{BlockData, BlockVersion};
+use mc_transaction_core_test_utils::get_blocks;
 use mc_util_uri::ConsensusClientUri as ClientUri;
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 use tempdir::TempDir;
@@ -23,21 +23,16 @@ fn _make_ledger_long(ledger: &mut LedgerDB) {
     let last_block = ledger.get_block(num_blocks - 1).unwrap();
     assert_eq!(last_block.cumulative_txo_count, ledger.num_txos().unwrap());
 
-    let mut rng: StdRng = SeedableRng::from_seed([1u8; 32]);
+    let mut rng = StdRng::from_seed([1u8; 32]);
 
-    let accounts: Vec<AccountKey> = (0..20).map(|_i| AccountKey::random(&mut rng)).collect();
-    let recipient_pub_keys = accounts
-        .iter()
-        .map(|account| account.default_subaddress())
-        .collect::<Vec<_>>();
-
-    let results: Vec<BlockData> = mc_transaction_core_test_utils::get_blocks(
+    let results: Vec<BlockData> = get_blocks(
         BlockVersion::ZERO,
-        &recipient_pub_keys[..],
+        20,
+        12,
         1,
+        10,
         1000,
-        1000,
-        &last_block,
+        last_block,
         &mut rng,
     );
 

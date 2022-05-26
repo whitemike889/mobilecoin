@@ -11,8 +11,7 @@ use mc_transaction_core::{
     },
     TokenId,
 };
-use mc_util_from_random::FromRandom;
-use rand::{CryptoRng, RngCore};
+use mc_util_from_random::{CryptoRng, FromRandom, RngCore};
 
 /// Generate a valid MintConfigTx and return it together with the set of signing
 /// keys that are allowed to sign it.

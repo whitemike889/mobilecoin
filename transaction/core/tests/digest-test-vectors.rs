@@ -7,6 +7,7 @@ use mc_transaction_core::{
     encrypted_fog_hint::EncryptedFogHint, tokens::Mob, tx::TxOut, Amount, Block, BlockVersion,
     Token,
 };
+use mc_transaction_core_test_utils::get_blocks_with_recipients;
 use mc_util_from_random::FromRandom;
 use mc_util_test_helper::{RngCore, RngType as FixedRng, SeedableRng};
 
@@ -202,28 +203,19 @@ fn test_blockchain(block_version: BlockVersion) -> Vec<[u8; 32]> {
 
     let origin_tx_outs = test_origin_tx_outs();
     let origin = Block::new_origin_block(&origin_tx_outs[..]);
-    let accounts = test_accounts();
-    let recipient_pub_keys = accounts
+    let recipients = test_accounts()
         .iter()
         .map(|account| account.default_subaddress())
         .collect::<Vec<_>>();
 
-    mc_transaction_core_test_utils::get_blocks(
-        block_version,
-        &recipient_pub_keys[..],
-        3,
-        50,
-        50,
-        &origin,
-        &mut rng,
-    )
-    .into_iter()
-    .map(|block_data| {
-        let hash = &block_data.block().contents_hash;
-        assert_eq!(hash, &block_data.contents().hash());
-        hash.0
-    })
-    .collect()
+    get_blocks_with_recipients(block_version, 3, &recipients, 1, 50, 50, origin, &mut rng)
+        .into_iter()
+        .map(|block_data| {
+            let hash = &block_data.block().contents_hash;
+            assert_eq!(hash, &block_data.contents().hash());
+            hash.0
+        })
+        .collect()
 }
 
 #[test]

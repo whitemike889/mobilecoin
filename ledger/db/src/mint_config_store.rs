@@ -434,7 +434,7 @@ pub mod tests {
         mint_config_tx_to_validated as to_validated,
     };
     use mc_util_from_random::FromRandom;
-    use rand::{rngs::StdRng, SeedableRng, RngCore};
+    use rand::{rngs::StdRng, RngCore, SeedableRng};
     use std::iter::FromIterator;
 
     pub fn init_mint_config_store() -> (MintConfigStore, Environment) {
