@@ -88,17 +88,6 @@ on:
         required: false
 
 jobs:
-  list-values:
-    runs-on: [self-hosted, Linux, small]
-    steps:
-    - name: values
-      run: |
-        echo namespace ${{ inputs.namespace }}
-        echo ingest_color ${{ inputs.ingest_color }}
-        echo fog_distribution ${{ inputs.fog_distribution }}
-        echo testing_1_1 ${{ inputs.testing_1_1 }}
-        echo testing_1_2 ${{ inputs.testing_1_2 }}
-
   setup-environment:
     runs-on: [self-hosted, Linux, small]
     env:
