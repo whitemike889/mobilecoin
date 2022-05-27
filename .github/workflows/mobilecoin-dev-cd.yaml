@@ -599,6 +599,7 @@ jobs:
       minting_config_enabled: true
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
       version: ${{ needs.generate-metadata.outputs.tag }}
+    secrets: inherit
 #     steps:
 #     - name: Update consensus config
 #       if: "! contains(github.event.head_commit.message, '[skip current-release-v2-update]')"
