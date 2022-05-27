@@ -67,25 +67,25 @@ on:
         type: string
         required: false
         default: 'true'
-    secrets:
-      RANCHER_CLUSTER:
-        description: "Rancher cluster name"
-        required: true
-      RANCHER_URL:
-        description: "Rancher server URL"
-        required: true
-      RANCHER_TOKEN:
-        description: "Rancher access token"
-        required: true
-      FOG_REPORT_SIGNING_CA_CERT:
-        description: "Fog Report Signing CA"
-        required: true
-      CACHE_BUSTER:
-        description: "string to make cache unique"
-        required: true
-      CLIENT_AUTH_USER_VALUE:
-        description: "client auth rendered value"
-        required: false
+    # secrets:
+    #   RANCHER_CLUSTER:
+    #     description: "Rancher cluster name"
+    #     required: true
+    #   RANCHER_URL:
+    #     description: "Rancher server URL"
+    #     required: true
+    #   RANCHER_TOKEN:
+    #     description: "Rancher access token"
+    #     required: true
+    #   FOG_REPORT_SIGNING_CA_CERT:
+    #     description: "Fog Report Signing CA"
+    #     required: true
+    #   CACHE_BUSTER:
+    #     description: "string to make cache unique"
+    #     required: true
+    #   CLIENT_AUTH_USER_VALUE:
+    #     description: "client auth rendered value"
+    #     required: false
 
 jobs:
   setup-environment:
