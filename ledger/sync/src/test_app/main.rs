@@ -9,7 +9,7 @@ use mc_connection::{ConnectionManager, HardcodedCredentialsProvider, ThickClient
 use mc_consensus_scp::{test_utils::test_node_id, QuorumSet};
 use mc_ledger_db::{Ledger, LedgerDB};
 use mc_ledger_sync::{LedgerSync, LedgerSyncService, PollingNetworkState};
-use mc_transaction_core::{Block, BlockContents, BlockVersion};
+use mc_transaction_core::{BlockData, BlockVersion};
 use mc_util_uri::ConsensusClientUri as ClientUri;
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 use tempdir::TempDir;
@@ -31,7 +31,7 @@ fn _make_ledger_long(ledger: &mut LedgerDB) {
         .map(|account| account.default_subaddress())
         .collect::<Vec<_>>();
 
-    let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+    let results: Vec<BlockData> = mc_transaction_core_test_utils::get_blocks(
         BlockVersion::ZERO,
         &recipient_pub_keys[..],
         1,
@@ -41,11 +41,11 @@ fn _make_ledger_long(ledger: &mut LedgerDB) {
         &mut rng,
     );
 
-    for (block, block_contents) in &results {
-        println!("block {} containing {:?}", block.index, block_contents);
-        // FIXME: Add metadata, too.
+    for block_data in results {
+        let block = block_data.block();
+        println!("block with index {} and ID {}", block.index, block.id);
         ledger
-            .append_block(block, block_contents, None, None)
+            .append_block_data(&block_data)
             .expect("failed to append block");
         assert_eq!(block.cumulative_txo_count, ledger.num_txos().unwrap());
     }

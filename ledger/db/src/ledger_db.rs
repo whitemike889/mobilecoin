@@ -3093,7 +3093,7 @@ mod ledger_db_test {
             .collect::<Vec<_>>();
 
         // Get some random blocks
-        let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+        let results = mc_transaction_core_test_utils::get_blocks(
             BLOCK_VERSION,
             &recipient_pub_keys[..],
             20,
@@ -3103,12 +3103,14 @@ mod ledger_db_test {
             &mut rng,
         );
 
-        for (block, block_contents) in &results {
-            println!("block {} containing {:?}", block.index, block_contents);
+        for block_data in results {
             ledger_db
-                .append_block(block, block_contents, None, None)
-                .unwrap();
-            assert_eq!(block.cumulative_txo_count, ledger_db.num_txos().unwrap());
+                .append_block_data(&block_data)
+                .expect("failed to write block data");
+            assert_eq!(
+                block_data.block().cumulative_txo_count,
+                ledger_db.num_txos().unwrap()
+            );
         }
     }
 
@@ -3133,7 +3135,7 @@ mod ledger_db_test {
             .collect::<Vec<_>>();
 
         // Get some random blocks
-        let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+        let results = mc_transaction_core_test_utils::get_blocks(
             BLOCK_VERSION,
             &recipient_pub_keys[..],
             20,
@@ -3143,10 +3145,10 @@ mod ledger_db_test {
             &mut rng,
         );
 
-        for (block, block_contents) in &results {
+        for block_data in results {
             ledger_db
-                .append_block(block, block_contents, None, None)
-                .unwrap();
+                .append_block_data(&block_data)
+                .expect("failed to write block");
         }
 
         // The root element should be the same for all TxOuts in the ledger.

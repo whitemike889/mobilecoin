@@ -1,4 +1,5 @@
 // Copyright (c) 2018-2022 The MobileCoin Foundation
+
 #![deny(missing_docs)]
 
 //! This load test creates an ingest server, adds users to it, and adds blocks,
@@ -310,7 +311,7 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
                 .map(|account| account.default_subaddress())
                 .collect::<Vec<_>>();
 
-            let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+            let results: Vec<BlockData> = mc_transaction_core_test_utils::get_blocks(
                 block_version,
                 &recipient_pub_keys[..],
                 REPETITIONS,
@@ -327,30 +328,30 @@ fn load_test(ingest_server_binary: &Path, test_params: TestParams, logger: Logge
                 REPETITIONS
             );
             let mut timings = Vec::<Duration>::with_capacity(REPETITIONS);
-            for (block, block_contents) in results.iter() {
+            for block_data in results {
                 let initial_highest_known_block_index = recovery_db
                     .get_highest_known_block_index()
                     .expect("Getting num blocks failed");
 
                 let start = Instant::now();
-                // FIXME: Add metadata, too.
                 ledger_db
-                    .append_block(block, block_contents, None, None)
+                    .append_block_data(&block_data)
                     .expect("Adding block failed");
 
+                let block = block_data.block();
                 // Add the timestamp information to watcher for this block index - note watcher
                 // does not allow signatures for block 0.
                 if block.index > 0 {
+                    let mut block_signature =
+                        BlockSignature::from_block_and_keypair(block, &signer)
+                            .expect("Could not create block signature from keypair");
+                    block_signature.set_signed_at(block.index);
                     for src_url in watcher.get_config_urls().unwrap().iter() {
-                        let mut block_signature =
-                            BlockSignature::from_block_and_keypair(block, &signer)
-                                .expect("Could not create block signature from keypair");
-                        block_signature.set_signed_at(block.index);
                         watcher
                             .add_block_signature(
                                 src_url,
                                 block.index,
-                                block_signature,
+                                block_signature.clone(),
                                 format!("00/{}", block.index),
                             )
                             .expect("Could not add block signature");

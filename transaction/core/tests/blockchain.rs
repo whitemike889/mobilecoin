@@ -1,5 +1,5 @@
 use mc_account_keys::AccountKey;
-use mc_transaction_core::{Block, BlockContents, BlockVersion};
+use mc_transaction_core::{Block, BlockVersion};
 
 #[test]
 fn test_cumulative_txo_counts() {
@@ -14,7 +14,7 @@ fn test_cumulative_txo_counts() {
                 .map(|account| account.default_subaddress())
                 .collect::<Vec<_>>();
 
-            let results: Vec<(Block, BlockContents)> = mc_transaction_core_test_utils::get_blocks(
+            let results = mc_transaction_core_test_utils::get_blocks(
                 block_version,
                 &recipient_pub_keys[..],
                 1,
@@ -24,14 +24,16 @@ fn test_cumulative_txo_counts() {
                 &mut rng,
             );
 
-            let mut prev = origin.clone();
-            for (block, block_contents) in &results {
+            let mut parent = origin.clone();
+            for block_data in results {
+                let block = block_data.block();
+                let block_txo_count = block_data.contents().outputs.len() as u64;
                 assert_eq!(
                     block.cumulative_txo_count,
-                    prev.cumulative_txo_count + block_contents.outputs.len() as u64
+                    parent.cumulative_txo_count + block_txo_count
                 );
-                assert_eq!(block.parent_id, prev.id);
-                prev = block.clone();
+                assert_eq!(block.parent_id, parent.id);
+                parent = block.clone();
             }
         }
     })
