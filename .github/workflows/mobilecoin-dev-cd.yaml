@@ -413,12 +413,12 @@ jobs:
     - generate-metadata
     with:
       block_version: 0
-      chart_repo: ${{ env.CHART_REPO }}
-      docker_image_org: ${{ env.DOCKER_ORG }}
+      chart_repo: ${{ needs.generate-metadata.outputs.chart_repo }}
+      docker_image_org: ${{ needs.generate-metadata.outputs.docker_org }}
       ingest_color: blue
       minting_config_enabled: false
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
-      version: ${{ env.PREVIOUS_RELEASE }}
+      version: ${{ needs.generate-metadata.outputs.previous_release }}
     secrets:
       # CLIENT_AUTH_TOKEN: ''
       CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
