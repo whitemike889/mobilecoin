@@ -419,23 +419,23 @@ jobs:
       minting_config_enabled: false
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
       version: ${{ needs.generate-metadata.outputs.previous_release }}
-    secrets: inherit
+    secrets:
       # CLIENT_AUTH_TOKEN: ''
-      # CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
-      # DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      # DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      # FOG_REPORT_SIGNING_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT }}
-      # FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT_KEY }}
-      # FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
-      # IAS_KEY: ${{ secrets.DEV_IAS_KEY }}
-      # IAS_SPID: ${{ secrets.DEV_IAS_SPID }}
-      # IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
-      # LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_LEDGER_AWS_ACCESS_KEY_ID }}
-      # LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_LEDGER_AWS_SECRET_ACCESS_KEY }}
-      # MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.DEV_MINTING_TRUST_ROOT_PRIVATE }}
-      # RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-      # RANCHER_URL: ${{ secrets.RANCHER_URL }}
-      # RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+      CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      FOG_REPORT_SIGNING_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT }}
+      FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT_KEY }}
+      FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
+      IAS_KEY: ${{ secrets.DEV_IAS_KEY }}
+      IAS_SPID: ${{ secrets.DEV_IAS_SPID }}
+      IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
+      LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_LEDGER_AWS_ACCESS_KEY_ID }}
+      LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_LEDGER_AWS_SECRET_ACCESS_KEY }}
+      MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.DEV_MINTING_TRUST_ROOT_PRIVATE }}
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
       # INITIAL_KEYS_SEED: ${{ secrets.DEV_INITIAL_KEYS_SEED }}
       # FOG_KEYS_SEED: ${{ secrets.DEV_FOG_KEYS_SEED }}
       # MNEMONIC_KEYS_SEED: ${{ secrets.DEV_MNEMONIC_KEYS_SEED }}
@@ -477,13 +477,13 @@ jobs:
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
       testing_1_1 : true
       testing_1_2: false
-    secrets: inherit
-      # CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
-      # # CLIENT_AUTH_USER_VALUE:  ${{ secrets.DEV_CLIENT_AUTH_USER_VALUE }}
-      # RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
-      # RANCHER_URL: ${{ secrets.RANCHER_URL }}
-      # RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
-      # FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
+    secrets:
+      CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
+      # CLIENT_AUTH_USER_VALUE:  ${{ secrets.DEV_CLIENT_AUTH_USER_VALUE }}
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+      FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
 
     # steps:
     # - name: Run MobileCoin integration tests
@@ -524,30 +524,22 @@ jobs:
       minting_config_enabled: true
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
       version: ${{ needs.generate-metadata.outputs.tag }}
-    secrets: inherit
-    # steps:
-    # - name: Deploy Release
-    #   if: "! contains(github.event.head_commit.message, '[skip current-release-v0-deploy]')"
-    #   uses: mobilecoinofficial/gha-workflow-dispatch@v2.1.3
-    #   with:
-    #     workflow: mobilecoin-dispatch-dev-deploy
-    #     token: ${{ secrets.ACTIONS_TOKEN }}
-    #     wait-for-completion: true
-    #     wait-for-completion-timeout: 30m
-    #     wait-for-completion-interval: 30s
-    #     display-workflow-run-url-interval: 30s
-    #     inputs: |
-    #       {
-    #         "block_version": "0",
-    #         "chart_repo": "${{ needs.generate-metadata.outputs.chart_repo }}",
-    #         "docker_image_org": "${{ needs.generate-metadata.outputs.docker_org }}",
-    #         "minting_config_enabled": "true",
-    #         "ingest_color": "green",
-    #         "namespace": "${{ needs.generate-metadata.outputs.namespace }}",
-    #         "version": "${{ needs.generate-metadata.outputs.tag }}",
-    #         "client_auth_enabled": "false",
-    #         "use_static_wallet_seeds": "true"
-    #       }
+    secrets:
+      CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      FOG_REPORT_SIGNING_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT }}
+      FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT_KEY }}
+      FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
+      IAS_KEY: ${{ secrets.DEV_IAS_KEY }}
+      IAS_SPID: ${{ secrets.DEV_IAS_SPID }}
+      IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
+      LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_LEDGER_AWS_ACCESS_KEY_ID }}
+      LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_LEDGER_AWS_SECRET_ACCESS_KEY }}
+      MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.DEV_MINTING_TRUST_ROOT_PRIVATE }}
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
 
   current-release-v0-test:
     # runs-on: [self-hosted, Linux, small]
@@ -561,7 +553,13 @@ jobs:
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
       testing_1_1 : true
       testing_1_2: false
-    secrets: inherit
+    secrets:
+      CACHE_BUSTER: ${{ secrets.CACHE_BUSTER }}
+      # CLIENT_AUTH_USER_VALUE:  ${{ secrets.DEV_CLIENT_AUTH_USER_VALUE }}
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+      FOG_REPORT_SIGNING_CA_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CA_CERT }}
 #     steps:
 #     - name: Run MobileCoin integration tests
 #       if: "! contains(github.event.head_commit.message, '[skip current-release-v0-test]')"
@@ -599,7 +597,21 @@ jobs:
       minting_config_enabled: true
       namespace: ${{ needs.generate-metadata.outputs.namespace }}
       version: ${{ needs.generate-metadata.outputs.tag }}
-    secrets: inherit
+    secrets:
+      # CLIENT_AUTH_TOKEN: ${{ secrets.DEV_CLIENT_AUTH_TOKEN }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      FOG_REPORT_SIGNING_CERT: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT }}
+      FOG_REPORT_SIGNING_CERT_KEY: ${{ secrets.DEV_FOG_REPORT_SIGNING_CERT_KEY }}
+      IAS_KEY: ${{ secrets.DEV_IAS_KEY }}
+      IAS_SPID: ${{ secrets.DEV_IAS_SPID }}
+      IP_INFO_TOKEN: ${{ secrets.DEV_IP_INFO_TOKEN }}
+      LEDGER_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_LEDGER_AWS_ACCESS_KEY_ID }}
+      LEDGER_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_LEDGER_AWS_SECRET_ACCESS_KEY }}
+      MINTING_TRUST_ROOT_PRIVATE: ${{ secrets.DEV_MINTING_TRUST_ROOT_PRIVATE }}
+      RANCHER_CLUSTER: ${{ secrets.RANCHER_CLUSTER }}
+      RANCHER_URL: ${{ secrets.RANCHER_URL }}
+      RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
 #     steps:
 #     - name: Update consensus config
 #       if: "! contains(github.event.head_commit.message, '[skip current-release-v2-update]')"

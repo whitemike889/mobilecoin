@@ -38,67 +38,67 @@ on:
         description: "block_version"
         type: string
         required: true
-    # secrets:
-    #   RANCHER_CLUSTER:
-    #     description: "Rancher cluster name"
-    #     required: true
-    #   RANCHER_URL:
-    #     description: "Rancher server URL"
-    #     required: true
-    #   RANCHER_TOKEN:
-    #     description: "Rancher access token"
-    #     required: true
-    #   LEDGER_AWS_ACCESS_KEY_ID:
-    #     description: "Ledger AWS S3 access"
-    #     required: true
-    #   LEDGER_AWS_SECRET_ACCESS_KEY:
-    #     description: "Ledger AWS S3 access"
-    #     required: true
-    #   IAS_KEY:
-    #     description: "IAS"
-    #     required: true
-    #   IAS_SPID:
-    #     description: "IAS"
-    #     required: true
-    #   FOG_REPORT_SIGNING_CERT:
-    #     description: "Fog Report signing cert pem"
-    #     required: true
-    #   FOG_REPORT_SIGNING_CERT_KEY:
-    #     description: "Fog Report signing cert key"
-    #     required: true
-    #   FOG_REPORT_SIGNING_CA_CERT:
-    #     description: "Fog Report signing CA cert"
-    #     required: true
-    #   MINTING_TRUST_ROOT_PRIVATE:
-    #     description: "Root private key for singing the tokens config"
-    #     required: false
-    #   DOCKERHUB_TOKEN:
-    #     description: "Docker hub creds"
-    #     required: false
-    #   DOCKERHUB_USERNAME:
-    #     description: "Docker hub creds"
-    #     required: false
-    #   IP_INFO_TOKEN:
-    #     description: "ipinfo.io token for authenticated access"
-    #     required: true
-    #   CLIENT_AUTH_TOKEN:
-    #     description: "shared token for client auth"
-    #     required: false
-    #   CACHE_BUSTER:
-    #     description: "string to make cache unique"
-    #     required: false
-    #   INITIAL_KEYS_SEED:
-    #     description: "static wallet seed"
-    #     required: false
-    #   FOG_KEYS_SEED:
-    #     description: "static wallet seed"
-    #     required: false
-    #   MNEMONIC_KEYS_SEED:
-    #     description: "static wallet seed"
-    #     required: false
-    #   MNEMONIC_FOG_KEYS_SEED:
-    #     description: "static wallet seed"
-    #     required: false
+    secrets:
+      RANCHER_CLUSTER:
+        description: "Rancher cluster name"
+        required: true
+      RANCHER_URL:
+        description: "Rancher server URL"
+        required: true
+      RANCHER_TOKEN:
+        description: "Rancher access token"
+        required: true
+      LEDGER_AWS_ACCESS_KEY_ID:
+        description: "Ledger AWS S3 access"
+        required: true
+      LEDGER_AWS_SECRET_ACCESS_KEY:
+        description: "Ledger AWS S3 access"
+        required: true
+      IAS_KEY:
+        description: "IAS"
+        required: true
+      IAS_SPID:
+        description: "IAS"
+        required: true
+      FOG_REPORT_SIGNING_CERT:
+        description: "Fog Report signing cert pem"
+        required: true
+      FOG_REPORT_SIGNING_CERT_KEY:
+        description: "Fog Report signing cert key"
+        required: true
+      FOG_REPORT_SIGNING_CA_CERT:
+        description: "Fog Report signing CA cert"
+        required: true
+      MINTING_TRUST_ROOT_PRIVATE:
+        description: "Root private key for singing the tokens config"
+        required: false
+      DOCKERHUB_TOKEN:
+        description: "Docker hub creds"
+        required: false
+      DOCKERHUB_USERNAME:
+        description: "Docker hub creds"
+        required: false
+      IP_INFO_TOKEN:
+        description: "ipinfo.io token for authenticated access"
+        required: true
+      CLIENT_AUTH_TOKEN:
+        description: "shared token for client auth"
+        required: false
+      CACHE_BUSTER:
+        description: "string to make cache unique"
+        required: false
+      INITIAL_KEYS_SEED:
+        description: "static wallet seed"
+        required: false
+      FOG_KEYS_SEED:
+        description: "static wallet seed"
+        required: false
+      MNEMONIC_KEYS_SEED:
+        description: "static wallet seed"
+        required: false
+      MNEMONIC_FOG_KEYS_SEED:
+        description: "static wallet seed"
+        required: false
 
 jobs:
   setup-environment:

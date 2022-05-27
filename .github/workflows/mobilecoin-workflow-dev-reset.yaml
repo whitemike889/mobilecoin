@@ -13,22 +13,22 @@ on:
         description: "Target Namespace"
         type: string
         required: true
-    # secrets:
-    #   RANCHER_CLUSTER:
-    #     description: "Rancher cluster name"
-    #     required: true
-    #   RANCHER_URL:
-    #     description: "Rancher server URL"
-    #     required: true
-    #   RANCHER_TOKEN:
-    #     description: "Rancher access token"
-    #     required: true
-    #   LEDGER_AWS_ACCESS_KEY_ID:
-    #     description: "Ledger AWS S3 access"
-    #     required: true
-    #   LEDGER_AWS_SECRET_ACCESS_KEY:
-    #     description: "Ledger AWS S3 access"
-    #     required: true
+    secrets:
+      RANCHER_CLUSTER:
+        description: "Rancher cluster name"
+        required: true
+      RANCHER_URL:
+        description: "Rancher server URL"
+        required: true
+      RANCHER_TOKEN:
+        description: "Rancher access token"
+        required: true
+      LEDGER_AWS_ACCESS_KEY_ID:
+        description: "Ledger AWS S3 access"
+        required: true
+      LEDGER_AWS_SECRET_ACCESS_KEY:
+        description: "Ledger AWS S3 access"
+        required: true
 
 jobs:
   reset-releases:
